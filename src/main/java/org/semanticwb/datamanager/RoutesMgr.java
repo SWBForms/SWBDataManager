@@ -67,7 +67,7 @@ public class RoutesMgr {
                     instance.map.put(key, new RouteData(obj, null));
                 }
             }
-            System.out.println("Routes:"+instance.map); 
+            //System.out.println("Routes:"+instance.map); 
         }
     }
 }
