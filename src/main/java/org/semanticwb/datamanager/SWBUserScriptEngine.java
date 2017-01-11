@@ -177,4 +177,32 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }
         return ret;
     }     
+
+    @Override
+    public boolean hasUserRole(String role) {
+        DataObject user=getUser();
+        if(user!=null)
+        {
+            DataList roles=user.getDataList("roles");
+            if(roles!=null)
+            {
+                return roles.contains(role);
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasUserGroup(String group) {
+        DataObject user=getUser();
+        if(user!=null)
+        {
+            DataList groups=user.getDataList("groups");
+            if(groups!=null)
+            {
+                return groups.contains(group);
+            }            
+        }
+        return false;        
+    }
 }

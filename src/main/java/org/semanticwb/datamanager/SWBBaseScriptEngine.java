@@ -4,6 +4,7 @@
  */
 package org.semanticwb.datamanager;
 
+import com.mongodb.util.JSON;
 import java.io.File;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
@@ -45,9 +46,11 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     private ScriptEngine sengine=null;
     private ScriptObject sobject=null;
     private String source=null;    
-    private File file=null;    
-    private transient long updated;
     private transient long lastCheck;
+    
+    private ArrayList<SWBScriptFile> files=new ArrayList();
+    //private File file=null;    
+    //private transient long updated;
     
     private static final List _emptyList_=new ArrayList();
     
@@ -73,14 +76,40 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         try
         {
             utils=new SWBScriptUtils(this);
-            lastCheck=System.currentTimeMillis();        
+            lastCheck=System.currentTimeMillis();  
+            
+            ArrayList<String> sources=new ArrayList();
             if(!source.equals("[GLOBAL]"))
             {
-                file=new File(DataMgr.getApplicationPath()+source);
-                updated=file.lastModified();
-            }else
-            {
-                updated=System.currentTimeMillis();;
+                int i=source.indexOf("[");
+                if(i>-1)
+                {
+                    String base=source.substring(0,i);
+                    String arr=source.substring(i);
+                    List<String> o=(List)JSON.parse(arr);
+                    System.out.println(o);
+                    o.forEach(s->{
+                        if(s.startsWith("/"))
+                        {
+                            sources.add(s);
+                        }else
+                        {
+                            sources.add(base+s);
+                        }
+                    });
+                }else
+                {
+                    sources.add(source);
+                }
+            }            
+            
+            files.clear();
+            if(!sources.isEmpty())
+            {                
+                sources.forEach(s->{
+                    File f=new File(DataMgr.getApplicationPath()+s); 
+                    files.add(new SWBScriptFile(f));
+                });
             }
             
             ScriptEngine engine=DataMgr.getNativeScriptEngine();     
@@ -275,7 +304,8 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                         }
                     }
                 }
-            }                                       
+            }            
+            
             
 //            //Load UserRepository
 //            {
@@ -532,17 +562,10 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         if((time-lastCheck)>10000)
         {
             lastCheck=time;
-            //System.out.println("time:"+(time-lastCheck)+" updated:"+updated+" source.lastModified():"+source.lastModified());
-            if(file!=null && updated!=file.lastModified())
-            {
-                synchronized(this)
-                {
-                    if(updated!=file.lastModified())
-                    {
-                        System.out.println("Update ScriptEngine");
-                        reloadScriptEngine();
-                    }
-                }
+            Iterator<SWBScriptFile> it=files.iterator();
+            while (it.hasNext()) {
+                SWBScriptFile f = it.next();
+                if(f.chechUpdates())break;
             }
         }
     }
@@ -656,6 +679,45 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     @Override
     public Object setContextData(String key, Object data) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean hasUserRole(String role) {
+        return false;
+    }
+
+    @Override
+    public boolean hasUserGroup(String group) {
+        return false;
+    }
+    
+    public class SWBScriptFile
+    {
+        private File file=null;      
+        private transient long updated;    
+
+        public SWBScriptFile(File file) {
+            this.file=file;
+            this.updated=file.lastModified();
+        }
+        
+        public boolean chechUpdates()
+        {
+            if(file!=null && updated!=file.lastModified())
+            {
+                synchronized(this)
+                {
+                    if(updated!=file.lastModified())
+                    {
+                        System.out.println("Update ScriptEngine");
+                        reloadScriptEngine();
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }        
+                
     }
     
 }

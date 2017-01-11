@@ -87,11 +87,17 @@ public class SWBDataSource
     
     public DataObject fetch(DataObject json) throws IOException
     {
-        DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_REQUEST, json);
-        DataObject res=db.fetch(req,this);
-        res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_RESPONSE, res);
-        engine.invokeDataServices(name, SWBDataSource.ACTION_FETCH, req, res);
-        return res;
+        if(canDoAction(ACTION_FETCH))
+        {
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_REQUEST, json);
+            DataObject res=db.fetch(req,this);
+            res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_RESPONSE, res);
+            engine.invokeDataServices(name, SWBDataSource.ACTION_FETCH, req, res);
+            return res;
+        }else
+        {
+            return getError(-5, "Forbidden Action");
+        }
     }
     
     public DataObject fetch(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
@@ -101,11 +107,17 @@ public class SWBDataSource
     
     public DataObject aggregate(DataObject json) throws IOException
     {
-        DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_AGGREGATE, SWBDataProcessor.METHOD_REQUEST, json);
-        DataObject res=db.aggregate(req,this);
-        res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_AGGREGATE, SWBDataProcessor.METHOD_RESPONSE, res);
-        engine.invokeDataServices(name, SWBDataSource.ACTION_AGGREGATE, req, res);
-        return res;
+        if(canDoAction(ACTION_AGGREGATE))
+        {        
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_AGGREGATE, SWBDataProcessor.METHOD_REQUEST, json);
+            DataObject res=db.aggregate(req,this);
+            res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_AGGREGATE, SWBDataProcessor.METHOD_RESPONSE, res);
+            engine.invokeDataServices(name, SWBDataSource.ACTION_AGGREGATE, req, res);
+            return res;
+        }else
+        {
+            return getError(-5, "Forbidden Action");
+        }            
     }
     
     public DataObject aggregate(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
@@ -255,22 +267,28 @@ public class SWBDataSource
     
     public DataObject update(DataObject json) throws IOException
     {
-        DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_UPDATE, SWBDataProcessor.METHOD_REQUEST, json);
-        DataObject res=db.update(req,this);
-        res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_UPDATE, SWBDataProcessor.METHOD_RESPONSE, res);
-        engine.invokeDataServices(name, SWBDataSource.ACTION_UPDATE, req, res);
-        
-        if(req!=null)
-        {
-            DataObject data=req.getDataObject("data");
-            if(data!=null)
+        if(canDoAction(ACTION_UPDATE))
+        {         
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_UPDATE, SWBDataProcessor.METHOD_REQUEST, json);
+            DataObject res=db.update(req,this);
+            res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_UPDATE, SWBDataProcessor.METHOD_RESPONSE, res);
+            engine.invokeDataServices(name, SWBDataSource.ACTION_UPDATE, req, res);
+
+            if(req!=null)
             {
-                String id=data.getString("_id");
-                cache.remove(id);
+                DataObject data=req.getDataObject("data");
+                if(data!=null)
+                {
+                    String id=data.getString("_id");
+                    cache.remove(id);
+                }
             }
-        }
-        
-        return res;
+
+            return res;
+        }else
+        {
+            return getError(-5, "Forbidden Action");
+        } 
     }   
     
     public DataObject update(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
@@ -285,11 +303,17 @@ public class SWBDataSource
     
     public DataObject add(DataObject json) throws IOException
     {
-        DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_ADD, SWBDataProcessor.METHOD_REQUEST, json);
-        DataObject res=db.add(req,this);
-        res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_ADD, SWBDataProcessor.METHOD_RESPONSE, res);
-        engine.invokeDataServices(name, SWBDataSource.ACTION_ADD, req, res);
-        return res;
+        if(canDoAction(ACTION_ADD))
+        {                  
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_ADD, SWBDataProcessor.METHOD_REQUEST, json);
+            DataObject res=db.add(req,this);
+            res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_ADD, SWBDataProcessor.METHOD_RESPONSE, res);
+            engine.invokeDataServices(name, SWBDataSource.ACTION_ADD, req, res);
+            return res;
+        }else
+        {
+            return getError(-5, "Forbidden Action");
+        }             
     }  
     
     public DataObject add(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
@@ -415,13 +439,19 @@ public class SWBDataSource
     
     public DataObject remove(DataObject json) throws IOException
     {
-        DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_REMOVE, SWBDataProcessor.METHOD_REQUEST, json);
-        checkRemoveDependence(json);
-        DataObject res=db.remove(req,this);
-        res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_REMOVE, SWBDataProcessor.METHOD_RESPONSE, res);
-        engine.invokeDataServices(name, SWBDataSource.ACTION_REMOVE, req, res);
-        cache.clear();        
-        return res;
+        if(canDoAction(ACTION_REMOVE))
+        {          
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_REMOVE, SWBDataProcessor.METHOD_REQUEST, json);
+            checkRemoveDependence(json);
+            DataObject res=db.remove(req,this);
+            res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_REMOVE, SWBDataProcessor.METHOD_RESPONSE, res);
+            engine.invokeDataServices(name, SWBDataSource.ACTION_REMOVE, req, res);
+            cache.clear();        
+            return res;
+        }else
+        {
+            return getError(-5, "Forbidden Action");
+        }         
     }   
     
     public DataObject remove(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
@@ -573,17 +603,121 @@ public class SWBDataSource
         return "_suri:"+modelid+":"+scls+":";
         //return "_suri:http://swb.org/"+dataStoreName+"/"+modelid+"/"+scls+":";
     }
-            
-//******************************************* static *******************************/            
     
-    public static DataObject getError(int x)
+    public boolean canDoAction(String action)
+    {
+        ScriptObject obj=script.get("security");
+        if(obj!=null)
+        {
+            ScriptObject act=obj.get(action);
+            //System.out.println("act:"+act);
+            if(act!=null)
+            {
+                ScriptObject roles=act.get("roles");    
+                //System.out.println("roles:"+roles);
+                if(roles!=null)
+                {
+                    boolean ret=false;
+                    Iterator<ScriptObject> it=roles.values().iterator();
+                    while (it.hasNext()) {
+                        String role = (String)it.next().getValue();
+                        //System.out.println("role:"+role);
+                        if(engine.hasUserRole(role))
+                        {
+                            ret=true;
+                            break;
+                        }
+                    }
+                    if(!ret)return false;
+                }
+                
+                ScriptObject groups=act.get("groups"); 
+                //System.out.println("groups:"+groups);
+                if(groups!=null)
+                {
+                    boolean ret=false;
+                    Iterator<ScriptObject> it=groups.values().iterator();
+                    while (it.hasNext()) {
+                        String group = (String)it.next().getValue();
+                        //System.out.println("group:"+group);
+                        if(engine.hasUserGroup(group))
+                        {
+                            ret=true;
+                            break;
+                        }
+                    }
+                    if(!ret)return false;
+                }
+                
+                ScriptObject users=act.get("users"); 
+                //System.out.println("groups:"+groups);
+                if(users!=null)
+                {
+                    boolean ret=false;
+                    Iterator<ScriptObject> it=users.values().iterator();
+                    while (it.hasNext()) {
+                        ScriptObject user = it.next();
+                        boolean ret2=true;
+                        Iterator<String> it2=user.keySet().iterator();
+                        while (it2.hasNext()) {
+                            String prop = it2.next();
+                            String value= user.getString(prop);
+                            //System.out.println("prop:"+prop+":"+value);
+                            if(!value.equals(engine.getUser().getString(prop)))
+                            {
+                                ret2=false;
+                                break;
+                            }
+                        }     
+                        ret=ret2;
+                        if(ret)break;
+                    }
+                    if(!ret)return false;
+                }
+                
+                return true;
+            }else
+            {
+                return true;
+            }
+        }else
+        {
+            return true;
+        }
+/*      
+    security:{
+        add:{
+            roles:["director","gerente"],
+            groups:["DAC","DADS"],
+            users:[{sex:"male"}]    //OR
+        },
+        remove:{
+            roles:["director"],
+        },
+        update:{
+            roles:["director","gerente"],
+        }        
+    }      
+*/        
+    }
+    
+//******************************************* static *******************************/            
+    public static DataObject getError(int status)
+    {
+        return getError(status, null);
+    }
+    
+    public static DataObject getError(int status, String errorMessage)
     {
         DataObject ret=new DataObject();
         DataObject resp=new DataObject();
-        ret.put("response", resp);
-        resp.put("status", x);
-        //resp.put("data", obj);
-        return ret;
+        ret.put("response", resp);        
+        resp.put("status", status);
+        if(errorMessage!=null)
+        {
+            resp.put("data", errorMessage);
+        }
+        return ret;        
     }
     
 //    private static ScriptObject getServerValidator(ScriptObject field, String type)

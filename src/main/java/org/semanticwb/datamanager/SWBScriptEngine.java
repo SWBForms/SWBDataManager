@@ -69,6 +69,10 @@ public interface SWBScriptEngine
     
     public DataObject getUser();
     
+    public boolean hasUserRole(String role);
+    
+    public boolean hasUserGroup(String group);
+    
     public Object getContextData(String key);
     
     public Object setContextData(String key, Object data); 
