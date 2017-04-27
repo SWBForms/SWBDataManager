@@ -6,6 +6,8 @@ package org.semanticwb.datamanager;
 
 import com.mongodb.util.JSON;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -121,15 +123,24 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
             if(baseDS!=null)
             {
                 engine=DataMgr.loadScript(baseDS, engine);
-            }            
-            
-            if(!source.equals("[GLOBAL]"))
-            {
+            }      
+                
+            Iterator<String> it2=sources.iterator();
+            while (it2.hasNext()) {
+                String f = it2.next();
                 if(internalSource)
-                    engine=DataMgr.loadLocalScript(source, engine); 
+                    engine=DataMgr.loadLocalScript(f, engine); 
                 else
-                    engine=DataMgr.loadScript(source, engine);  
+                    engine=DataMgr.loadScript(f, engine);                 
             }
+            
+//            if(!source.equals("[GLOBAL]"))
+//            {
+//                if(internalSource)
+//                    engine=DataMgr.loadLocalScript(source, engine); 
+//                else
+//                    engine=DataMgr.loadScript(source, engine);  
+//            }
             
             ScriptObject eng=new ScriptObject(engine.get("eng"));
             sobject=eng;
