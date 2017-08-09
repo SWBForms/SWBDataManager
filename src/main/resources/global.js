@@ -10,6 +10,15 @@ var eng = {
     dataExtractors:{},                  //DataExtractors
     fileSources: {},
     routes:{},
+    getDataSource:function()
+    {
+        return {
+            toValueMap:function()
+            {
+                return null;
+            }
+        }
+    }
 };
 
 

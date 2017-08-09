@@ -71,7 +71,15 @@ public interface SWBScriptEngine
     
     public boolean hasUserRole(String role);
     
+    public boolean hasUserAnyRole(String... roles);
+    
+    public boolean hasUserAnyRole(List<String> roles);
+    
     public boolean hasUserGroup(String group);
+    
+    public void removeUserPermissionCache();
+    
+    public boolean hasUserPermission(String permission);
     
     public Object getContextData(String key);
     

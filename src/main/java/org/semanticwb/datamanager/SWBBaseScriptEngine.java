@@ -6,8 +6,6 @@ package org.semanticwb.datamanager;
 
 import com.mongodb.util.JSON;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -696,9 +694,30 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     public boolean hasUserRole(String role) {
         return false;
     }
+    
+    @Override
+    public boolean hasUserAnyRole(String... roles)
+    {
+        return false;
+    }
+    
+    @Override
+    public boolean hasUserAnyRole(List<String> roles)
+    {
+        return false;
+    }
 
     @Override
     public boolean hasUserGroup(String group) {
+        return false;
+    }
+
+    @Override
+    public void removeUserPermissionCache() {        
+    }
+
+    @Override
+    public boolean hasUserPermission(String permission) {
         return false;
     }
     

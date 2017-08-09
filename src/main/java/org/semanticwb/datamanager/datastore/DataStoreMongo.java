@@ -77,7 +77,7 @@ public class DataStoreMongo implements SWBDataStore
     public DataObject fetch(DataObject dson, SWBDataSource dataSource) throws IOException
     {
         BasicDBObject json=toBasicDBObject(dson);
-        
+        //System.out.println("fetch:"+dson);
 //        MongoClient mongoClient = new MongoClient("localhost");
         try
         {
@@ -180,7 +180,7 @@ public class DataStoreMongo implements SWBDataStore
             }            
             resp.append("endRow", endrow);
             resp.append("totalRows", total);   
-            //System.out.println("fetach:"+ret);
+            //System.out.println("fetch ret:"+ret);
             return toDataObject(ret);        
         }finally
         {
@@ -388,7 +388,7 @@ public class DataStoreMongo implements SWBDataStore
     
     
     
-    private Object toBasicDB(Object obj)
+    public Object toBasicDB(Object obj)
     {
         if(obj instanceof DataObject)
         {
@@ -400,7 +400,7 @@ public class DataStoreMongo implements SWBDataStore
         return obj;  
     }    
     
-    private BasicDBList toBasicDBList(DataList obj)
+    public BasicDBList toBasicDBList(DataList obj)
     {
         BasicDBList ret=new BasicDBList();
         Iterator it=obj.iterator();
@@ -410,7 +410,7 @@ public class DataStoreMongo implements SWBDataStore
         return ret;
     }    
 
-    private BasicDBObject toBasicDBObject(DataObject obj)
+    public BasicDBObject toBasicDBObject(DataObject obj)
     {
         BasicDBObject ret=new BasicDBObject();
         Iterator<Map.Entry<String,Object>> it=obj.entrySet().iterator();
@@ -458,4 +458,8 @@ public class DataStoreMongo implements SWBDataStore
     {
         return toData(JSON.parse(json));
     }
+
+    public MongoClient getMongoClient() {
+        return mongoClient;
+    }        
 }

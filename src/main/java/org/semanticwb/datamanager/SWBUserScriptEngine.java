@@ -6,6 +6,7 @@
 
 package org.semanticwb.datamanager;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.util.List;
 import java.util.Set;
@@ -25,7 +26,6 @@ public class SWBUserScriptEngine implements SWBScriptEngine
     SWBBaseScriptEngine engine=null;
     DataObject user=null;
     javax.servlet.http.HttpSession session=null;
-    
     
     public SWBUserScriptEngine(SWBBaseScriptEngine engine, javax.servlet.http.HttpSession session)
     {
@@ -191,6 +191,30 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }
         return false;
     }
+    
+    @Override
+    public boolean hasUserAnyRole(String... roles) {
+        if(roles!=null)
+        {
+            for(int x=0;x<roles.length;x++)
+            {
+                if(hasUserRole(roles[x]))return true;
+            }
+        }
+        return false;
+    }
+    
+    @Override
+    public boolean hasUserAnyRole(List<String> roles) {
+        if(roles!=null)
+        {
+            for(int x=0;x<roles.size();x++)
+            {
+                if(hasUserRole(roles.get(x)))return true;
+            }
+        }
+        return false;
+    }    
 
     @Override
     public boolean hasUserGroup(String group) {
@@ -205,4 +229,60 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }
         return false;        
     }
+    
+    @Override
+    public void removeUserPermissionCache()
+    {
+        if(session!=null)
+        {
+            session.removeAttribute("_PERMISSIONS_"); 
+        }
+    }    
+    
+    protected DataObject getUserPermissions() throws IOException
+    {        
+        DataObject permissions=null;
+        if(session!=null)
+        {
+            permissions=(DataObject)session.getAttribute("_PERMISSIONS_");
+            if(permissions==null)
+            {
+                synchronized(this)
+                {
+                    permissions=(DataObject)session.getAttribute("_PERMISSIONS_");
+                    if(permissions==null)
+                    {        
+                        permissions=DataUtils.mapDataSourceByFields(getDataSource("Permission"), "name","roles");        
+                        session.setAttribute("_PERMISSIONS_",permissions);        
+                        System.out.println("permissions session:"+permissions);
+                    }
+                }
+            }
+        }else
+        {
+            permissions=DataUtils.mapDataSourceByFields(getDataSource("Permission"), "name","roles");    
+            System.out.println("permissions:"+permissions);
+        }
+        return permissions;
+    }
+    
+    @Override
+    public boolean hasUserPermission(String permission)
+    {        
+        DataObject permissions = null;
+        try 
+        {
+            permissions = getUserPermissions();
+        } catch (Exception e) 
+        {
+            e.printStackTrace();
+        }
+        if (permissions != null) 
+        {
+            return hasUserAnyRole(permissions.getDataList(permission));
+        } else 
+        {
+            return false;
+        }
+    }    
 }

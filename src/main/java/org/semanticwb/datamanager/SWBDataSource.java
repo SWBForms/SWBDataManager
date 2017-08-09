@@ -90,6 +90,7 @@ public class SWBDataSource
         if(canDoAction(ACTION_FETCH))
         {
             DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_REQUEST, json);
+            if(json.getInt("endRow",0)==0 && json.getInt("startRow",0)==0)json.put("endRow", 1000);
             DataObject res=db.fetch(req,this);
             res=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_RESPONSE, res);
             engine.invokeDataServices(name, SWBDataSource.ACTION_FETCH, req, res);

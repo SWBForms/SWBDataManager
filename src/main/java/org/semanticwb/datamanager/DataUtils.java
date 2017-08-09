@@ -20,6 +20,15 @@ import org.semanticwb.datamanager.script.ScriptObject;
  * @author javier.solis.g
  */
 public class DataUtils {
+    
+    /**
+     * Create a new and unique String Id 
+     * @return String with ID
+     */
+    public static String createId()
+    {
+        return new org.bson.types.ObjectId().toString();
+    }
 
     /**
      * Lee el contenido del InputStream y lo convierte a un String
@@ -206,6 +215,73 @@ public class DataUtils {
             ret.put(entry.getKey(), toData(entry.getValue()));
         }
         return ret;
+    }        
+
+    /**
+     * Map data source with keyField like a key and _id like a value
+     * @param ds
+     * @param field
+     * @return
+     * @throws IOException 
+     */
+    public static DataObject mapDataSourceByField(SWBDataSource ds, String keyField) throws IOException
+    {
+        int block=1000;
+        DataObject map=new DataObject();
+        int startRow=0;
+        int endRow=block;
+        int totalRows=0;
+        do
+        {
+            DataObject res=ds.fetch(new DataObject().addParam("startRow", startRow).addParam("endRow", endRow)).getDataObject("response");
+            DataList<DataObject>data=res.getDataList("data");
+            for(DataObject obj:data)
+            {
+                map.put(obj.get(keyField).toString(), obj.getId());
+            }
+            startRow=res.getInt("startRow");
+            endRow=res.getInt("endRow");
+            totalRows=res.getInt("totalRows"); 
+            if(endRow==totalRows)break;
+            startRow+=block;
+            endRow+=block;
+        }while(true);
+        
+        return map;
+    }    
+    
+    /**
+     * Map data source with keyField like a key and valueField like a value
+     * @param ds
+     * @param keyField
+     * @param valueField
+     * @return
+     * @throws IOException 
+     */
+    public static DataObject mapDataSourceByFields(SWBDataSource ds, String keyField, String valueField) throws IOException
+    {
+        int block=1000;
+        DataObject map=new DataObject();
+        int startRow=0;
+        int endRow=block;
+        int totalRows=0;
+        do
+        {
+            DataObject res=ds.fetch(new DataObject().addParam("startRow", startRow).addParam("endRow", endRow)).getDataObject("response");
+            DataList<DataObject>data=res.getDataList("data");
+            for(DataObject obj:data)
+            {
+                map.put(obj.get(keyField).toString(), obj.get(valueField));
+            }
+            startRow=res.getInt("startRow");
+            endRow=res.getInt("endRow");
+            totalRows=res.getInt("totalRows"); 
+            if(endRow==totalRows)break;
+            startRow+=block;
+            endRow+=block;
+        }while(true);
+        
+        return map;
     }        
     
     public static class TEXT
