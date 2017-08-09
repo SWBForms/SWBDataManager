@@ -144,9 +144,10 @@ public class SWBScriptUtils {
                     Message msg = new MimeMessage(session);
                     Address[] addrs = new Address[]{new InternetAddress(from, fromName)};
                     msg.addFrom(addrs);
-                    msg.setRecipient(Message.RecipientType.TO, userAddr);
+                    msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
                     msg.setSubject(subject);
                     msg.setDataHandler(new DataHandler(message, contentType));
+                    
                     proccessor.submit(() -> 
                     {
                         try {
