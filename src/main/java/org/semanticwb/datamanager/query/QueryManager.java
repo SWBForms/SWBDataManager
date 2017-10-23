@@ -25,7 +25,12 @@ public class QueryManager {
     QueryDefinition definition;
     DataObject user;
 
-    
+    /**
+     * 
+     * @param datasources 
+     * @param user
+     * @param def 
+     */
     public QueryManager(String datasources, DataObject user, QueryDefinition def) {
         this.datasources=datasources;
         this.definition=def;
@@ -48,7 +53,7 @@ public class QueryManager {
             Iterator<QueryProperty> itp=obj.getProperties().iterator();
             while (itp.hasNext()) {
                 QueryProperty prop = itp.next();
-                prop.setDisplayName(ds.getDataSourceScriptField(prop.getDsname()).getString("title"));
+                prop.setDisplayName(ds.getDataSourceScriptField(prop.getDsName()).getString("title"));
             }                        
         }
     }
@@ -63,7 +68,7 @@ public class QueryManager {
                 props.add(new DataObject()
                         .addParam("name",prop.getName())
                         .addParam("value",prop.getValue())
-                        .addParam("dsname",prop.getDsname())
+                        .addParam("dsname",prop.getDsName())
                         .addParam("title", prop.getDisplayName())
                         .addParam("ds",qobj.getDsName())
                 );
@@ -92,7 +97,6 @@ public class QueryManager {
     private boolean processObject(DataObject in, DataObject out, QueryObject qobj, DataList data) throws IOException
     {
         if(in==null)return false;
-        boolean canAdd=true;
         
         Iterator<QueryProperty> it=qobj.getProperties().iterator();
         while (it.hasNext()) {
@@ -101,9 +105,9 @@ public class QueryManager {
             {
                 boolean add=false;
                 String val=prop.getValue();
-                Object orig=in.get(prop.getDsname());
+                Object orig=in.get(prop.getDsName());
                 
-                if(orig!=null)System.out.println(val+"="+orig+" "+orig.getClass());
+                //if(orig!=null)System.out.println(val+"="+orig+" "+orig.getClass());
                 
                 if(val.equals("?"))
                 {
@@ -160,16 +164,16 @@ public class QueryManager {
                 }else if(val.startsWith(">"))
                 {
                     val=val.substring(1);
-                    System.out.println(">");
+                    //System.out.println(">");
                     if(orig instanceof Integer)
                     {
-                        System.out.println(val+">"+orig);
+                        //System.out.println(val+">"+orig);
                         try
                         {
                             int v=Integer.parseInt(val);
                             if((Integer)orig>v)add=true;
                         }catch(NumberFormatException noe){}
-                        System.out.println(val+">"+orig+" add:"+add);
+                        //System.out.println(val+">"+orig+" add:"+add);
                     }else if(orig instanceof Double)
                     {
                         try
@@ -210,40 +214,46 @@ public class QueryManager {
                 else return false;
             }else
             {
-                canAdd=false;
                 QueryObject nqobj=prop.getObject();
-                Object oid=in.get(prop.getDsname());
-                if(oid instanceof DataList)
+                Object oid=in.get(prop.getDsName());
+                if(oid!=null)
                 {
-                    DataList ids=(DataList)oid;
-                    for(int x=0;x<ids.size();x++)
+                    if(oid instanceof DataList)
                     {
-                        String id=ids.getString(x);
+                        DataList ids=(DataList)oid;
+                        for(int x=0;x<ids.size();x++)
+                        {
+                            String id=ids.getString(x);
+                            System.out.println("nqobj:"+nqobj+" "+nqobj.getDsName()+" "+dsCache.get(nqobj.getDsName()));
+                            DataObject nin=dsCache.get(nqobj.getDsName()).getRecord(id);
+                            if(x==0)
+                            {
+                                if(!processObject(nin, out, nqobj, data))
+                                {
+                                    return false;
+                                }                                                          
+                            }else
+                            {
+                                DataObject nout=(DataObject)out.clone();
+                                if(!addObject(nin, nout, nqobj, data))
+                                {
+                                    return false;
+                                }                                                                                      
+                            }
+                        }                    
+                    }else
+                    {
+                        String id=oid.toString();
                         DataObject nin=dsCache.get(nqobj.getDsName()).getRecord(id);
-                        if(x==0)
+
+                        if(!processObject(nin, out, nqobj,data))
                         {
-                            if(!processObject(nin, out, nqobj, data))
-                            {
-                                return false;
-                            }                                                          
-                        }else
-                        {
-                            DataObject nout=(DataObject)out.clone();
-                            if(!addObject(nin, nout, nqobj, data))
-                            {
-                                return false;
-                            }                                                                                      
-                        }
-                    }                    
+                            return false;
+                        }                
+                    }
                 }else
                 {
-                    String id=oid.toString();
-                    DataObject nin=dsCache.get(nqobj.getDsName()).getRecord(id);
-
-                    if(!processObject(nin, out, nqobj,data))
-                    {
-                        return false;
-                    }                
+                    System.out.println("Obj:"+prop.getObject()+" DSName:"+prop.getDsName());
                 }
             }
         }
@@ -273,9 +283,13 @@ public class QueryManager {
         return ret;
     }
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException
+    {
         QueryDefinition def=new QueryDefinition();
         def.addQueryObject("Facturas", "?Facturas1").addQueryProperty("numero", "?numero1", "?");
-        QueryManager mgr=new QueryManager("/test/datasources.js",null,def);        
+        
+        QueryManager mgr=new QueryManager("/test/datasources.js",null,def);  
+        //DataObject ret=mgr.execute();
+        //System.out.println("ret:"+ret);
     }
 }

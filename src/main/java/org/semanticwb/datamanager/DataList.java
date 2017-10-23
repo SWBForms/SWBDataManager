@@ -7,7 +7,9 @@
 package org.semanticwb.datamanager;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  *
@@ -15,6 +17,46 @@ import java.util.Iterator;
  */
 public class DataList<E> extends ArrayList<E>
 {
+    
+    /**
+     * Add obj if is diferent to null, else add def
+     * @param index
+     * @param obj
+     * @param def
+     * @return 
+     */
+    public boolean add(int index, E obj, E def)
+    {
+        if(obj==null)
+        {
+            add(index, def);
+            return false;
+        }else
+        {
+            add(index, obj);
+            return true;
+        }
+    }
+    
+    /**
+     * Add obj if is diferent to null, else add def
+     * @param obj
+     * @param def
+     * @return 
+     */
+    public boolean add(E obj, E def)
+    {
+        if(obj==null)
+        {
+            add(def);
+            return false;
+        }else
+        {
+            add(obj);
+            return true;
+        }
+    }
+    
     public String getString(int index) {
         Object obj=get(index);
         if(obj==null)return null;
@@ -25,6 +67,16 @@ public class DataList<E> extends ArrayList<E>
     {
         Object obj=get(index);
         if(obj instanceof DataObject)return (DataObject)obj;
+        return null;
+    }
+    
+    public DataObject findDataObject(String property, Object value)
+    {
+        for(int x=0;x<size();x++)
+        {
+            Object val=getDataObject(x).get(property);
+            if(val!=null && val.equals(value))return getDataObject(x);
+        }
         return null;
     }
     
@@ -86,7 +138,7 @@ public class DataList<E> extends ArrayList<E>
             Object object = it.next();
             if(object instanceof String)
             {
-                sb.append("\""+object+"\"");
+                sb.append(DataObject.encodeString((String)object,true));
             }else
             {
                 sb.append(object);

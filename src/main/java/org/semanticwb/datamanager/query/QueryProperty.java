@@ -39,11 +39,11 @@ public class QueryProperty {
         this.value = value;
     }     
 
-    public void setDsname(String dsname) {
+    public void setDsName(String dsname) {
         this.dsname = dsname;
     }
 
-    public String getDsname() {
+    public String getDsName() {
         return dsname;
     }
     

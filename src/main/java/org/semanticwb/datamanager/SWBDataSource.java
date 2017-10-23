@@ -85,6 +85,86 @@ public class SWBDataSource
 //        return fetch((DataObject)JSON.parse(query));
 //    }
     
+    public DataObjectIterator find() throws IOException
+    {
+        return find(new DataObject());
+    }      
+    
+    public DataObjectIterator find(DataObject json) throws IOException
+    {
+        if(canDoAction(ACTION_FETCH))
+        {
+            DataObject req=engine.invokeDataProcessors(name, SWBDataSource.ACTION_FETCH, SWBDataProcessor.METHOD_REQUEST, json);
+            DataObjectIterator res=db.find(req,this);
+            return res;
+        }else
+        {
+            return new DataObjectIterator();
+        }
+    }  
+    
+    public DataObjectIterator find(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
+    {        
+        return find(DataUtils.toDataObject(json));
+    }  
+    
+    public DataObject mapByNumId() throws IOException
+    {
+        return mapByNumId(new DataObject());
+    }    
+    
+    public DataObject mapByNumId(DataObject json) throws IOException
+    {
+        DataObject ret=new DataObject();
+        DataObjectIterator it = find(json);
+        while (it.hasNext()) {
+            DataObject dev = it.next();
+            ret.put(dev.getNumId(), dev);
+        }     
+        return ret;
+    }
+    
+    public DataObject mapByNumId(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
+    {        
+        return mapByNumId(DataUtils.toDataObject(json));
+    } 
+    
+    public DataObject mapById() throws IOException
+    {
+        return mapByField("_id");
+    }    
+    
+    public DataObject mapById(DataObject json) throws IOException
+    {
+        return mapByField(json, "_id");
+    }
+    
+    public DataObject mapById(jdk.nashorn.api.scripting.ScriptObjectMirror json) throws IOException
+    {        
+        return mapByField(DataUtils.toDataObject(json),"_id");
+    }     
+    
+    public DataObject mapByField(String field) throws IOException
+    {
+        return mapByField(new DataObject(), field);
+    }    
+    
+    public DataObject mapByField(DataObject json, String field) throws IOException
+    {
+        DataObject ret=new DataObject();
+        DataObjectIterator it = find(json);
+        while (it.hasNext()) {
+            DataObject dev = it.next();
+            ret.put(dev.getString(field), dev);
+        }     
+        return ret;
+    } 
+    
+    public DataObject mapByField(jdk.nashorn.api.scripting.ScriptObjectMirror json, String field) throws IOException
+    {        
+        return mapByField(DataUtils.toDataObject(json),field);
+    }     
+    
     public DataObject fetch(DataObject json) throws IOException
     {
         if(canDoAction(ACTION_FETCH))

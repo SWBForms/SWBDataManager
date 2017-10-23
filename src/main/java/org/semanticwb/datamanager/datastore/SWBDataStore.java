@@ -7,6 +7,7 @@ package org.semanticwb.datamanager.datastore;
 
 import java.io.IOException;
 import org.semanticwb.datamanager.DataObject;
+import org.semanticwb.datamanager.DataObjectIterator;
 import org.semanticwb.datamanager.SWBDataSource;
 
 /**
@@ -15,6 +16,8 @@ import org.semanticwb.datamanager.SWBDataSource;
  */
 public interface SWBDataStore 
 {
+    public DataObjectIterator find(DataObject json, SWBDataSource dataSource) throws IOException;
+    
     public DataObject fetch(DataObject json, SWBDataSource dataSource) throws IOException;
 
     public DataObject aggregate(DataObject json, SWBDataSource dataSource) throws IOException;

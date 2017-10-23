@@ -5,15 +5,20 @@
  */
 package org.semanticwb.datamanager;
 
-import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import org.semanticwb.datamanager.datastore.DataStoreMongo;
 
 /**
  *
  * @author javiersolis
  */
-public class DataObject extends HashMap<String, Object> {
+public class DataObject extends LinkedHashMap<String, Object> {
 
     @Override
     public Object put(String key, Object value) {
@@ -131,12 +136,37 @@ public class DataObject extends HashMap<String, Object> {
         }
         return 0.0;
     }
+    
+    public Date getDate(String key, Date def) {
+        Date ret=getDate(key);
+        if (ret == null) {
+            return def;
+        }
+        return ret;
+    }
+
+    public Date getDate(String key) {
+        Object obj = get(key);
+        if (obj instanceof Date) {
+            return (Date) obj;
+        }
+        return null;
+    }    
 
     public static Object parseJSON(String json) {
         return DataStoreMongo.parseJSON(json);
     }
-
+    
     public String toString() {
+        return toString(false);
+    }
+    
+    public String toString(boolean ident) {
+        if(ident)return toString("");
+        return toString(null);
+    }    
+
+    private String toString(String sep) {
         Iterator<Entry<String, Object>> i = entrySet().iterator();
         if (!i.hasNext()) {
             return "{}";
@@ -148,12 +178,10 @@ public class DataObject extends HashMap<String, Object> {
             Entry<String, Object> e = i.next();
             String key = e.getKey();
             Object value = e.getValue();
-            sb.append("\"" + key + "\"");
+            sb.append(encodeString(key,true));
             sb.append(':');
             if (value instanceof String) {
-                value = ((String) value).replace("\"", "\\\"");
-                value = ((String) value).replace("\n", "\\n");
-                sb.append(value == this ? "(this Map)" : "\"" + value + "\"");
+                sb.append(value == this ? "(this Map)" :  encodeString((String)value,true) );
             } else {
                 sb.append(value == this ? "(this Map)" : value);
             }
@@ -215,6 +243,85 @@ public class DataObject extends HashMap<String, Object> {
         DataList data = new DataList();
         put(key, data);
         return data;
+    }   
+    
+    public void sort(Comparator<Map.Entry<String,Object>> comp)
+    {
+        entrySet().stream().sorted(comp).forEach((Map.Entry<String, Object> t) -> {
+            remove(t.getKey());
+            put(t.getKey(), t.getValue());
+        });
     }
+    
+    protected static String encodeString(String value, boolean addDoubleQuotes)
+    {
+        if(value==null)return "null";
+
+        int len = value.length();
+        boolean needEncode = false;
+        char c;
+        for (int i = 0; i < len; i++)
+        {
+            c = value.charAt(i);
+
+            if (c >= 0 && c <= 31 || c == 34 || c == 39 || c == 60 || c == 62 || c == 92)
+            {
+                needEncode = true;
+                break;
+            }
+        }
+
+        if (!needEncode)return addDoubleQuotes ? "\"" + value + "\"" : value;
+
+        StringBuilder sb = new StringBuilder();
+        if (addDoubleQuotes)
+            sb.append('"');
+
+        for (int i = 0; i < len; i++)
+        {
+            c = value.charAt(i);
+            if (c >= 0 && c <= 7 || c == 11 || c >= 14 && c <= 31 || c == 39 || c == 60 || c == 62)
+                sb.append("\\u"+String.format("%04d", (int)c));
+            else switch ((int)c)
+                {
+                    case 8:
+                        sb.append("\\b");
+                        break;
+
+                    case 9:
+                        sb.append("\\t");
+                        break;
+
+                    case 10:
+                        sb.append("\\n");
+                        break;
+
+                    case 12:
+                        sb.append("\\f");
+                        break;
+
+                    case 13:
+                        sb.append("\\r");
+                        break;
+
+                    case 34:
+                        sb.append("\\\"");
+                        break;
+
+                    case 92:
+                        sb.append("\\\\");
+                        break;
+
+                    default:
+                        sb.append(c);
+                        break;
+                }
+        }
+
+        if (addDoubleQuotes)
+            sb.append('"');
+
+        return sb.toString();
+    }    
 
 }

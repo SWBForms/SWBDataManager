@@ -52,6 +52,11 @@ public class DataMgr
         return DataMgr.getUserScriptEngine(path, session, false);          
     }
     
+    public static SWBScriptEngine initPlatform(String path, javax.servlet.http.HttpSession session, boolean internal)
+    {
+        return DataMgr.getUserScriptEngine(path, session, internal);          
+    }
+    
     public void setBaseDatasourse(String baseDatasource)
     {
         this.baseDatasource=baseDatasource;

@@ -54,7 +54,7 @@ public class QueryDefinition {
         Iterator<QueryProperty> it=obj.getProperties().iterator();
         while (it.hasNext()) {
             QueryProperty prop = it.next();
-            ret.append(space+prop.getDsname()+":"+prop.getName()+":"+prop.getValue()+"\n");
+            ret.append(space+prop.getDsName()+":"+prop.getName()+":"+prop.getValue()+"\n");
             if(prop.getObject()!=null)
             {
                 ret.append(toString(prop.getObject(), space+"--"));

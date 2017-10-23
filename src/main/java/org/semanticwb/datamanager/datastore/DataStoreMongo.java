@@ -22,6 +22,7 @@ import java.util.logging.Logger;
 import org.bson.types.ObjectId;
 import org.semanticwb.datamanager.DataList;
 import org.semanticwb.datamanager.DataObject;
+import org.semanticwb.datamanager.DataObjectIterator;
 import org.semanticwb.datamanager.SWBDataSource;
 import org.semanticwb.datamanager.script.ScriptObject;
 
@@ -74,7 +75,7 @@ public class DataStoreMongo implements SWBDataStore
         }
     }
     
-    public DataObject fetch(DataObject dson, SWBDataSource dataSource) throws IOException
+    public DataObjectIterator find(DataObject dson, SWBDataSource dataSource) throws IOException
     {
         BasicDBObject json=toBasicDBObject(dson);
         //System.out.println("fetch:"+dson);
@@ -94,22 +95,13 @@ public class DataStoreMongo implements SWBDataStore
             //String componentId = json.getString("componentId");
             String textMatchStyle = json.getString("textMatchStyle");
             BasicDBObject data = (BasicDBObject)json.get("data");
-            BasicDBObject oldValues = (BasicDBObject)json.get("oldValues");
+            //BasicDBObject oldValues = (BasicDBObject)json.get("oldValues");
             BasicDBList sortBy= (BasicDBList)json.get("sortBy");        
-
-
-            BasicDBObject ret=new BasicDBObject();
-            BasicDBObject resp=new BasicDBObject();
-            BasicDBList ndata=new BasicDBList();
-            ret.append("response", resp);
-            resp.append("status", 0);
-            resp.append("startRow", startRow);
-            resp.append("data", ndata);
 
             //textMatchStyle
             //  exact
             //  substring
-            // startsWith
+            // startsWith            
             if(data!=null && data.size()>0)
             {
                 Iterator<String> it=data.keySet().iterator();
@@ -117,28 +109,52 @@ public class DataStoreMongo implements SWBDataStore
                 {
                     String key=it.next();
                     Object val=data.get(key);
+                    
+                    ScriptObject field=dataSource.getDataSourceScriptField(key);
+                    String type=null;
+                    if(field!=null)
+                    {
+                        field.getString("stype");    
+                        if(type==null)type=field.getString("type");
+                    }
+                    //System.out.println("key:"+key+" type:"+type+" value:"+val);
 
-                    if(key.equals("_id"))
+                    if(val!=null && !key.startsWith("$"))
                     {
-                        if(val instanceof BasicDBList)
+                        if(val instanceof String)
                         {
-                            data.put(key, new BasicDBObject().append("$in",val));
-                        }
-                    }else if(textMatchStyle!=null && val instanceof String)
-                    {
-                        if("substring".equals(textMatchStyle))
+                            String value=(String)val;
+                            if(key.equals("_id") || "select".equals(type) || value.startsWith("_suri:"))//is key
+                            {
+                                
+                            }else if(textMatchStyle!=null)
+                            {
+                                if("substring".equals(textMatchStyle))
+                                {
+                                    data.put(key, new BasicDBObject().append("$regex",val));
+                                }else if("startsWith".equals(textMatchStyle))
+                                {
+                                    data.put(key, new BasicDBObject().append("$regex","^"+val));
+                                }
+                            }
+                        }else if(val instanceof BasicDBList)
                         {
-                            data.put(key, new BasicDBObject().append("$regex",val));
-                        }else if("startsWith".equals(textMatchStyle))
-                        {
-                            data.put(key, new BasicDBObject().append("$regex","^"+val));
+                            BasicDBList value=(BasicDBList)val;
+                            if(key.equals("_id"))
+                            {
+                                data.put(key, new BasicDBObject().append("$in",val));
+                            }else
+                            {
+                                BasicDBObject all=new BasicDBObject();
+                                all.put("$all", val);
+                                data.put(key, all);
+                            }
                         }
                     }
-
                 }
             }
 
-            //System.out.println("find:"+scls+" "+data);
+            System.out.println("find:"+scls+" "+data);
             log.fine("find: "+scls+" "+data);
             DBCursor cur = coll.find(data);
             int total=cur.count();
@@ -160,28 +176,54 @@ public class DataStoreMongo implements SWBDataStore
                 }
                 cur.sort(sort);
             }            
-
-
+            
             if(startRow>0)cur.skip(startRow);
-            cur.limit(endRow-startRow);
+            if(endRow>0)cur.limit(endRow-startRow);
+            
+            return new DataObjectIteratorMongo(cur, total);
+        }finally
+        {
+//            mongoClient.close();
+        }
+    }        
+    
+    public DataObject fetch(DataObject dson, SWBDataSource dataSource) throws IOException
+    {
+        BasicDBObject json=toBasicDBObject(dson);
+        DataObjectIterator it=find(dson,dataSource);
+        try
+        {
+            int startRow = json.getInt("startRow",0);
+            int endRow = json.getInt("endRow",0);
+
+            DataObject ret=new DataObject();
+            DataObject resp=new DataObject();
+            DataList ndata=new DataList();
+            ret.addParam("response", resp);
+            resp.addParam("status", 0);
+            resp.addParam("startRow", startRow);
+            resp.addParam("data", ndata);
+
+            int total=it.total();
+
             int endrow=startRow;
             try
             {
-                while (cur.hasNext())
+                while (it.hasNext())
                 {
-                    DBObject dbobj = cur.next();
+                    DataObject dbobj = it.next();
                     ndata.add(dbobj);
                     endrow++;
                     if(endrow==endRow)break;
                 }
             } finally
             {
-                cur.close();
+                it.close();
             }            
-            resp.append("endRow", endrow);
-            resp.append("totalRows", total);   
+            resp.addParam("endRow", endrow);
+            resp.addParam("totalRows", total);   
             //System.out.println("fetch ret:"+ret);
-            return toDataObject(ret);        
+            return ret;     
         }finally
         {
 //            mongoClient.close();
@@ -421,7 +463,7 @@ public class DataStoreMongo implements SWBDataStore
         return ret;
     }
     
-    private static Object toData(Object obj)
+    public static Object toData(Object obj)
     {
         if(obj instanceof BasicDBObject)
         {
@@ -433,7 +475,7 @@ public class DataStoreMongo implements SWBDataStore
         return obj;  
     }    
     
-    private static DataList toDataList(BasicDBList obj)
+    public static DataList toDataList(BasicDBList obj)
     {
         DataList ret=new DataList();
         Iterator it=obj.iterator();
@@ -443,7 +485,7 @@ public class DataStoreMongo implements SWBDataStore
         return ret;
     }    
 
-    private static DataObject toDataObject(BasicDBObject obj)
+    public static DataObject toDataObject(BasicDBObject obj)
     {
         DataObject ret=new DataObject();
         Iterator<Map.Entry<String,Object>> it=obj.entrySet().iterator();
