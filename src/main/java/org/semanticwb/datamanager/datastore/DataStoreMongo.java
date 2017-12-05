@@ -154,7 +154,7 @@ public class DataStoreMongo implements SWBDataStore
                 }
             }
 
-            System.out.println("find:"+scls+" "+data);
+            //System.out.println("find:"+scls+" "+data);
             log.fine("find: "+scls+" "+data);
             DBCursor cur = coll.find(data);
             int total=cur.count();

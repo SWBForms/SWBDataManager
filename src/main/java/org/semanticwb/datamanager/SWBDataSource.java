@@ -37,8 +37,7 @@ public class SWBDataSource
     
     private HashMap<String,DataObject> cache=new HashMap();    
     private HashMap<String,String> removeDependenceFields=null;
-    
-
+        
     protected SWBDataSource(String name, String modelid, ScriptObject script, SWBScriptEngine engine)
     {
         this.name=name;
@@ -431,7 +430,7 @@ public class SWBDataSource
                                 String dss=obj.getString("dataSource");
                                 removeDependenceFields.put(name,dss);
                             }
-                        }   
+                        }
                     }
                     ScriptObject links=script.get("links");
                     if(links!=null)
