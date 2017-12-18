@@ -271,7 +271,11 @@ public class DataUtils {
             DataList<DataObject>data=res.getDataList("data");
             for(DataObject obj:data)
             {
-                map.put(obj.get(keyField).toString(), obj.get(valueField));
+                String key=obj.getString(keyField);
+                if(key!=null)
+                {
+                    map.put(key, obj.get(valueField));
+                }
             }
             startRow=res.getInt("startRow");
             endRow=res.getInt("endRow");
