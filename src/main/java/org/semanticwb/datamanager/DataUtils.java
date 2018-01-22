@@ -130,8 +130,6 @@ public class DataUtils {
         out.close();
     }    
     
-    
-
     public static ScriptObject getArrayNode(ScriptObject arr, String prop, String value) {
         if (arr != null) {
             Iterator<ScriptObject> it1 = arr.values().iterator();
@@ -145,6 +143,21 @@ public class DataUtils {
         }
         return null;
     }
+    
+    public static ArrayList<ScriptObject> getArrayNodes(ScriptObject arr, String prop, String value) {
+        ArrayList<ScriptObject> ret=new ArrayList();
+        if (arr != null) {
+            Iterator<ScriptObject> it1 = arr.values().iterator();
+            while (it1.hasNext()) {
+                ScriptObject obj = it1.next();
+                String val = obj.getString(prop);
+                if (val != null && val.equals(value)) {
+                    ret.add(obj);
+                }
+            }
+        }
+        return ret;
+    }    
 
     public static String encodeSHA(String str) 
     {

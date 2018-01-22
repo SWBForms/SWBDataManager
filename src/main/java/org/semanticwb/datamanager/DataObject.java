@@ -281,7 +281,7 @@ public class DataObject extends LinkedHashMap<String, Object> {
         {
             c = value.charAt(i);
             if (c >= 0 && c <= 7 || c == 11 || c >= 14 && c <= 31 || c == 39 || c == 60 || c == 62)
-                sb.append("\\u"+String.format("%04d", (int)c));
+                sb.append("\\u"+String.format("%04x", (int)c));
             else switch ((int)c)
                 {
                     case 8:

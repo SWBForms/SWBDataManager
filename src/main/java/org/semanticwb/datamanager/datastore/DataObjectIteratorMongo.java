@@ -37,7 +37,7 @@ public class DataObjectIteratorMongo extends DataObjectIterator
     @Override
     public DataObject next() {
         return DataStoreMongo.toDataObject((BasicDBObject)cursor.next());
-    }    
+    }
 
     @Override
     public int total() {

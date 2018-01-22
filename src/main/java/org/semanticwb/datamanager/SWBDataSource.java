@@ -5,6 +5,7 @@
 package org.semanticwb.datamanager;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -638,7 +639,24 @@ public class SWBDataSource
         return validate(DataUtils.toDataObject(json));
     }
     
+    /**
+     * Return field with name 
+     * @param name
+     * @return
+     * @deprecated replaced by getScriptField
+     */
+    @Deprecated
     public ScriptObject getDataSourceScriptField(String name)
+    {
+        return getScriptField(name);
+    }
+    
+    /**
+     * Return field with name 
+     * @param name
+     * @return 
+     */
+    public ScriptObject getScriptField(String name)
     {
         ScriptObject fields=script.get("fields");
         ScriptObject ret=DataUtils.getArrayNode(fields, "name", name);
@@ -649,6 +667,21 @@ public class SWBDataSource
         }
         return ret;
     }
+    
+    /**
+     * return fields that have property and value
+     * @param prop
+     * @param value
+     * @return ArrayList with fields
+     */
+    public ArrayList<ScriptObject> findScriptFields(String prop, String value)
+    {
+        ScriptObject fields=script.get("fields");
+        ArrayList<ScriptObject> ret=DataUtils.getArrayNodes(script.get("fields"), prop, value);
+        ArrayList<ScriptObject> ret2=DataUtils.getArrayNodes(script.get("links"), prop, value);
+        ret.addAll(ret2);
+        return ret;
+    } 
     
     public String getModelId()
     {
