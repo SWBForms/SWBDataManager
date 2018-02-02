@@ -9,6 +9,7 @@ package org.semanticwb.datamanager;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.semanticwb.datamanager.script.ScriptObject;
 
@@ -17,8 +18,8 @@ import org.semanticwb.datamanager.script.ScriptObject;
  * @author javiersolis
  */
 public class RoutesMgr {
-    private static RoutesMgr instance=null;
-    private static final Logger logger = Logger.getLogger("o.s.d.RoutesMgr");
+    private static final Logger logger = Logger.getLogger(RoutesMgr.class.getName());
+    private static RoutesMgr instance=null;   
     private final Map<String, RouteData> map = new ConcurrentHashMap<String, RouteData>();
     private String loginRoute;   
 
@@ -44,7 +45,7 @@ public class RoutesMgr {
         Iterator<String> it=routes.keySet().iterator();
         while (it.hasNext()) {
             String dsname = it.next();
-            System.out.println("Loading Routes:"+dsname); 
+            logger.log(Level.FINE,"Loading Routes:"+dsname); 
             ScriptObject route=routes.get(dsname);
             String lfb=route.getString("loginFallback");
             if(lfb!=null)instance.loginRoute=lfb;

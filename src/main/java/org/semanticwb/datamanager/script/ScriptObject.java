@@ -11,7 +11,10 @@ import java.util.Set;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.semanticwb.datamanager.DataList;
 import org.semanticwb.datamanager.DataMgr;
+import org.semanticwb.datamanager.DataObject;
+import org.semanticwb.datamanager.DataUtils;
 import org.semanticwb.datamanager.SWBScriptEngine;
 
 
@@ -170,4 +173,20 @@ public class ScriptObject
     {
         return new ScriptObject(((ScriptObjectMirror)_obj).call(b, args));
     }
+    
+    public DataObject toDataObject()
+    {
+        return DataUtils.toDataObject((ScriptObjectMirror)_obj);
+    }
+    
+    public DataList toDataList()
+    {
+        return DataUtils.toDataList((ScriptObjectMirror)_obj);
+    }
+    
+    public Object toData()
+    {
+        return DataUtils.toData(_obj);
+    }
+    
 }

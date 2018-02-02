@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -30,6 +32,8 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public class SWBBaseScriptEngine implements SWBScriptEngine 
 {
+    private static final Logger logger = Logger.getLogger(SWBBaseScriptEngine.class.getName());
+    
     private static final ConcurrentHashMap<String,SWBBaseScriptEngine> engines=new ConcurrentHashMap();
     
 //    private final HashMap<SWBUser, Bindings> users=new HashMap();    
@@ -72,7 +76,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     
     private void init()
     {
-        System.out.println("initializing DataManager Engine...");
+        logger.log(Level.INFO,"Loading ScriptEngine: "+source);
         try
         {
             utils=new SWBScriptUtils(this);
@@ -87,7 +91,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                     String base=source.substring(0,i);
                     String arr=source.substring(i);
                     List<String> o=(List)JSON.parse(arr);
-                    System.out.println(o);
+                    //System.out.println(o);
                     o.forEach(s->{
                         if(s.startsWith("/"))
                         {
@@ -162,7 +166,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                     {
                         Class cls=Class.forName(dataStoreClass);
                         Constructor c=cls.getConstructor(ScriptObject.class);
-                        System.out.println("Loading DataStore:"+dsname);
+                        logger.log(Level.INFO,"Loading DataStore:"+dsname);
                         dataStores.put(dsname,(SWBDataStore)c.newInstance(dataStore));
                     }catch(Exception e){e.printStackTrace();}        
                 }
@@ -177,7 +181,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 Iterator<String> it=dss.keySet().iterator();
                 while (it.hasNext()) {
                     String dsname = it.next();
-                    System.out.println("Loading DataSource:"+dsname);                    
+                    logger.log(Level.INFO,"Loading DataSource:"+dsname);                    
                     ScriptObject so=dss.get(dsname);
                     dataSources.put(dsname, so);
                 }
@@ -190,7 +194,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 HashMap<String,DataExtractorBase> dataExtractors=new HashMap();
                 this.dataExtractors=dataExtractors;
                 ScriptObject ext=eng.get("dataExtractors");   
-                System.out.println("Loading Extractors");
+                logger.log(Level.INFO,"Loading Extractors");
                 Iterator<String> it=ext.keySet().iterator();
                 while(it.hasNext())
                 {
@@ -214,7 +218,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 {
                     String key=it.next();
                     ScriptObject data=dss.get(key);
-                    System.out.println("Loading DataService:"+key);
+                    logger.log(Level.INFO,"Loading DataService:"+key);
                     SWBDataService dataService=new SWBDataService(key,data);
                     
                     Iterator<ScriptObject> dsit=data.get("dataSources").values().iterator();
@@ -269,7 +273,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 {
                     String key=it.next();
                     ScriptObject data=dss.get(key);
-                    System.out.println("Loading DataProcessor:"+key);
+                    logger.log(Level.INFO,"Loading DataProcessor:"+key);
                     SWBDataProcessor dataProcessor=new SWBDataProcessor(key,data);
                     
                     Iterator<ScriptObject> dsit=data.get("dataSources").values().iterator();
@@ -341,7 +345,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                     {
                         Class cls=Class.forName(fileSourceClass);
                         Constructor c=cls.getConstructor(ScriptObject.class, ScriptObject.class);
-                        System.out.println("Loading FileSource:"+dsname); 
+                        logger.log(Level.INFO,"Loading FileSource:"+dsname); 
                         fileSources.put(dsname,(SWBFileSource)c.newInstance(fileSource, ds));
                     }catch(Exception e){e.printStackTrace();}        
                 }
@@ -585,7 +589,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         Bindings b=null;
 //        if(user==null)return null;
 //        Bindings b = users.get(user);
-        System.out.println("getUserBindings:"+engine);
+//        System.out.println("getUserBindings:"+engine);
 //        if(b==null)
 //        {
 //            synchronized(users)
@@ -629,7 +633,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 {
                     closed=true;
                     dataExtractorsStop();
-                    System.out.println("Closed DataManager Engine...");
+                    logger.log(Level.INFO,"Closed ScriptEngine: "+source);
                 }
             }
         }
@@ -647,7 +651,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     
 //******************************** static *****************************************************//    
     
-    protected static SWBBaseScriptEngine getScriptEngine(String source, boolean internal)
+    public static SWBBaseScriptEngine getScriptEngine(String source, boolean internal)
     {
         SWBBaseScriptEngine engine=engines.get(source);        
         if(engine==null)
@@ -739,7 +743,7 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 {
                     if(updated!=file.lastModified())
                     {
-                        System.out.println("Update ScriptEngine");
+                        logger.log(Level.INFO,"Update ScriptEngine:"+source);
                         reloadScriptEngine();
                         return true;
                     }

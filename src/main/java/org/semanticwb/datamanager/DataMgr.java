@@ -11,6 +11,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -21,6 +23,8 @@ import javax.script.ScriptException;
  */
 public class DataMgr 
 {
+    private static final Logger logger = Logger.getLogger(DataMgr.class.getName());
+    
     private static DataMgr instance=null;
     
     private static ScriptEngineManager factory = null;
@@ -31,7 +35,7 @@ public class DataMgr
     
     private DataMgr(String applicationPath)
     {
-        System.out.println("Initializing DataMgr:"+applicationPath);        
+        logger.log(Level.INFO,"Initializing DataMgr:"+applicationPath);        
         instance=this;
         
         factory = new ScriptEngineManager(); 
@@ -89,7 +93,30 @@ public class DataMgr
     public static String getApplicationPath() {
         return applicationPath;
     }
+/*    
+    public static String readApplicationFile(String source)throws IOException
+    {
+        return readApplicationFile(source,"UTF8");
+    }    
     
+    public static String readApplicationFile(String source, String encode)throws IOException
+    {
+        logger.log(Level.FINE,"readApplicationFile:"+source);        
+        File f=new File(instance.applicationPath+source);
+        //System.out.println(f.getPath()+" "+f.exists());
+        
+        if(f.isFile())
+        {
+            //Carga Script de inicializacion
+            FileInputStream in=new FileInputStream(f);
+            if(encode!=null)
+                return DataUtils.readInputStream(in, encode);
+            else 
+                return DataUtils.readInputStream(in);
+        } 
+        return null;        
+    }
+*/    
     
     public static ScriptEngine getNativeScriptEngine()
     {
@@ -105,7 +132,7 @@ public class DataMgr
      */
     protected static ScriptEngine loadScript(String source, ScriptEngine engine) throws IOException, ScriptException
     {
-        System.out.println("loadScript:"+source);        
+        logger.log(Level.FINE,"loadScript:"+source);        
         File f=new File(instance.applicationPath+source);
         //System.out.println(f.getPath()+" "+f.exists());
         
@@ -126,7 +153,7 @@ public class DataMgr
      */
     protected static ScriptEngine loadLocalScript(String source, ScriptEngine engine) throws IOException, ScriptException
     {
-        System.out.println("loadLocalScript:"+source);  
+        logger.log(Level.FINE,"loadLocalScript:"+source);  
         InputStream r=DataMgr.class.getResourceAsStream(source);
         //System.out.println("r:"+r);
         if(r!=null)

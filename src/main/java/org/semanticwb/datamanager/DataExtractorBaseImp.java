@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.semanticwb.datamanager.extractors.ScriptExtractor;
 import org.semanticwb.datamanager.script.ScriptObject;
@@ -20,6 +22,7 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public class DataExtractorBaseImp implements DataExtractorBase
 {
+    private static final Logger logger = Logger.getLogger(DataExtractorBaseImp.class.getName());
     private String name=null;
     private SWBScriptEngine scriptEngine=null;
     private ScriptObject scriptObject=null;
@@ -36,7 +39,7 @@ public class DataExtractorBaseImp implements DataExtractorBase
         this.dataSource=engine.getDataSource(dataSourceName);        
         if(this.dataSource==null)throw new NoSuchFieldError("DataSource not found:"+dataSourceName);
         
-        System.out.println("Loading DataExtractor:"+name);
+        logger.log(Level.INFO,"Loading DataExtractor:"+name);
         String dataClass=script.getString("class");
         if(dataClass!=null)
         {
