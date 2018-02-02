@@ -18,6 +18,14 @@ var eng = {
                 return null;
             }
         }
+    },
+    require:function(source)
+    {
+        var DataMgr = Java.type('org.semanticwb.datamanager.DataMgr');
+        try
+        {
+            load(DataMgr.getApplicationPath()+source);
+        }catch(e){print(e);}
     }
 };
 
