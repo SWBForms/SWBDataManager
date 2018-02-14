@@ -284,5 +284,12 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         {
             return false;
         }
-    }    
+    }   
+
+    @Override
+    public String getAppName() {
+        return engine.getAppName();
+    }
+    
+    
 }

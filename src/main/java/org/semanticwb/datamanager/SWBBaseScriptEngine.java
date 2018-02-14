@@ -724,6 +724,15 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     public boolean hasUserPermission(String permission) {
         return false;
     }
+
+    @Override
+    public String getAppName() {
+        ScriptObject config = getScriptObject().get("config");
+        if (config != null) {
+            return config.getString("appName");
+        }
+        return null;
+    }
     
     public class SWBScriptFile
     {

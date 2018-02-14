@@ -24,6 +24,8 @@ var eng = {
         var DataMgr = Java.type('org.semanticwb.datamanager.DataMgr');
         try
         {
+            var i=source.indexOf("?");
+            if(i>-1)source=source.substring(0,i);
             load(DataMgr.getApplicationPath()+source);
         }catch(e){print(e);}
     }

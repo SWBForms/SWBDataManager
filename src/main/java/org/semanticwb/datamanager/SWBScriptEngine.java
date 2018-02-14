@@ -22,6 +22,7 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public interface SWBScriptEngine 
 {
+    public String getAppName();
 
     public void chechUpdates();
 

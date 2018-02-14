@@ -157,6 +157,24 @@ public class DataObject extends LinkedHashMap<String, Object> {
         return DataStoreMongo.parseJSON(json);
     }
     
+    public String toStringHtmlScape(boolean ident)
+    {
+        String str=toString(ident);
+        StringBuilder buf=new StringBuilder();
+        int c=0;
+        int i=str.indexOf("\\u",c);
+        while(i>-1)
+        {
+            buf.append(str.substring(c,i));
+            int v=Integer.parseInt(str.substring(i+2,i+6),16);
+            buf.append("&#"+v+";");
+            c=i+6;
+            i=str.indexOf("\\u",c);
+        }
+        buf.append(str.substring(c));
+        return buf.toString();
+    }
+    
     public String toString() {
         return toString(false);
     }

@@ -458,7 +458,10 @@ public class DataStoreMongo implements SWBDataStore
         Iterator<Map.Entry<String,Object>> it=obj.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<String, Object> entry = it.next();
-            ret.put(entry.getKey(), toBasicDB(entry.getValue()));
+            //if(!entry.getKey().startsWith("$"))
+            //{
+                ret.put(entry.getKey(), toBasicDB(entry.getValue()));
+            //}
         }
         return ret;
     }
