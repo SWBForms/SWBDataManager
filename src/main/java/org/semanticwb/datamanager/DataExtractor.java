@@ -14,10 +14,24 @@ import java.io.IOException;
  */
 public interface DataExtractor 
 {   
+
+    /**
+     *
+     * @param base
+     */
     public void start(DataExtractorBase base);
     
+    /**
+     *
+     * @param base
+     * @throws IOException
+     */
     public void extract(DataExtractorBase base) throws IOException;
     //void store(HashMap data);
     
+    /**
+     *
+     * @param base
+     */
     public void stop(DataExtractorBase base);
 }

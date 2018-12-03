@@ -14,8 +14,26 @@ import org.semanticwb.datamanager.exceptions.SWBDataManagerException;
  * @author serch
  */
 public class SWBFileObject {
+
+    /**
+     *
+     */
     public enum Type {
-        BYTE, FILE, STREAM
+
+        /**
+         *
+         */
+        BYTE,
+
+        /**
+         *
+         */
+        FILE,
+
+        /**
+         *
+         */
+        STREAM
     }
     
     private final Type type;
@@ -26,6 +44,12 @@ public class SWBFileObject {
     private final InputStream contentStream;
     private boolean alreadyGiven = false;
 
+    /**
+     *
+     * @param name
+     * @param contenType
+     * @param content
+     */
     public SWBFileObject(String name, String contenType, byte[] content) {
         this.type = Type.BYTE;
         this.name = name;
@@ -35,6 +59,12 @@ public class SWBFileObject {
         this.contentStream = null;
     }
     
+    /**
+     *
+     * @param name
+     * @param contenType
+     * @param content
+     */
     public SWBFileObject(String name, String contenType, File content) {
         this.type = Type.FILE;
         this.name = name;
@@ -44,6 +74,12 @@ public class SWBFileObject {
         this.contentStream = null;
     }
     
+    /**
+     *
+     * @param name
+     * @param contenType
+     * @param content
+     */
     public SWBFileObject(String name, String contenType, InputStream content) {
         this.type = Type.STREAM;
         this.name = name;
@@ -53,18 +89,34 @@ public class SWBFileObject {
         this.contentStream = content;
     }
 
+    /**
+     *
+     * @return
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getContentType() {
         return contentType;
     }
     
+    /**
+     *
+     * @return
+     */
     public byte[] getContentAsByteArray() {
         if (type == Type.BYTE) return contentByte;
         try {
@@ -74,11 +126,19 @@ public class SWBFileObject {
         }
     }
     
+    /**
+     *
+     * @return
+     */
     public File getContentAsFile() {
         if (type == Type.FILE) return contentFile;
         else throw new SWBDataManagerException("This content can't be transformed to a File");
     }
     
+    /**
+     *
+     * @return
+     */
     public InputStream getContentAsInputStream(){
         try {
             return toInputStream();

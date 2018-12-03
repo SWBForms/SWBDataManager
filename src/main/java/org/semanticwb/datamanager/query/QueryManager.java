@@ -37,6 +37,10 @@ public class QueryManager {
         this.user=user;
     }        
     
+    /**
+     *
+     * @throws IOException
+     */
     public void preload() throws IOException
     {
         SWBScriptEngine engine = DataMgr.getUserScriptEngine(datasources, user,false);
@@ -260,6 +264,11 @@ public class QueryManager {
         return true;
     }
     
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     public DataObject execute() throws IOException
     {
         DataObject ret=new DataObject();
@@ -283,6 +292,11 @@ public class QueryManager {
         return ret;
     }
     
+    /**
+     *
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException
     {
         QueryDefinition def=new QueryDefinition();

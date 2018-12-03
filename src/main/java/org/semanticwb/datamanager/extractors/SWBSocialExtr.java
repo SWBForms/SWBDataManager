@@ -19,6 +19,11 @@ import org.semanticwb.datamanager.DataObject;
 public class SWBSocialExtr implements DataExtractor
 {
 
+    /**
+     *
+     * @param base
+     * @throws IOException
+     */
     @Override
     public void extract(DataExtractorBase base) throws IOException
     {
@@ -38,6 +43,10 @@ public class SWBSocialExtr implements DataExtractor
         base.store(req);
     }
 
+    /**
+     *
+     * @param base
+     */
     @Override
     public void start(DataExtractorBase base) {
         System.out.println("Start:"+base.getName());
@@ -50,6 +59,10 @@ public class SWBSocialExtr implements DataExtractor
         }
     }
 
+    /**
+     *
+     * @param base
+     */
     @Override
     public void stop(DataExtractorBase base) {
         System.out.println("Stop:"+base.getName());        

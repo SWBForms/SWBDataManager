@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import javax.servlet.ServletContext;
 
 /**
  *
@@ -30,6 +31,8 @@ public class DataMgr
     private static ScriptEngineManager factory = null;
     
     private static String applicationPath=null;
+    
+    private static ServletContext context=null;
     
     private String baseDatasource=null;
     
@@ -46,35 +49,70 @@ public class DataMgr
         RoutesMgr.startup();
     }
     
+    /**
+     *
+     * @param session
+     * @return
+     */
     public static SWBScriptEngine initPlatform(javax.servlet.http.HttpSession session)
     {
         return DataMgr.getUserScriptEngine("[GLOBAL]", session, false);          
     }    
     
+    /**
+     *
+     * @param path
+     * @param session
+     * @return
+     */
     public static SWBScriptEngine initPlatform(String path, javax.servlet.http.HttpSession session)
     {
         return DataMgr.getUserScriptEngine(path, session, false);          
     }
     
+    /**
+     *
+     * @param path
+     * @param session
+     * @param internal
+     * @return
+     */
     public static SWBScriptEngine initPlatform(String path, javax.servlet.http.HttpSession session, boolean internal)
     {
         return DataMgr.getUserScriptEngine(path, session, internal);          
     }
     
+    /**
+     *
+     * @param baseDatasource
+     */
     public void setBaseDatasourse(String baseDatasource)
     {
         this.baseDatasource=baseDatasource;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getBaseDatasource() {
         return baseDatasource;
     }
     
+    /**
+     *
+     * @return
+     */
     public static DataMgr getBaseInstance()
     {
         return instance;
     }    
     
+    /**
+     *
+     * @param applicationPath
+     * @return
+     */
     public static DataMgr createInstance(String applicationPath)
     {
         if(instance==null)
@@ -88,8 +126,23 @@ public class DataMgr
             }
         }
         return instance;
+    }    
+    
+    /**
+     *
+     * @param ctx
+     * @return
+     */
+    public static DataMgr createInstance(ServletContext ctx)
+    {
+        context=ctx;
+        return createInstance(ctx.getRealPath("/"));
     }
 
+    /**
+     *
+     * @return
+     */
     public static String getApplicationPath() {
         return applicationPath;
     }
@@ -118,6 +171,10 @@ public class DataMgr
     }
 */    
     
+    /**
+     *
+     * @return
+     */
     public static ScriptEngine getNativeScriptEngine()
     {
         // create a JavaScript engine         
@@ -129,6 +186,9 @@ public class DataMgr
      * Relaltive to Application path
      * @param source
      * @param engine 
+     * @return  
+     * @throws java.io.IOException  
+     * @throws javax.script.ScriptException  
      */
     protected static ScriptEngine loadScript(String source, ScriptEngine engine) throws IOException, ScriptException
     {
@@ -150,6 +210,9 @@ public class DataMgr
      * Relaltive to Class path
      * @param source
      * @param engine 
+     * @return  
+     * @throws java.io.IOException 
+     * @throws javax.script.ScriptException 
      */
     protected static ScriptEngine loadLocalScript(String source, ScriptEngine engine) throws IOException, ScriptException
     {
@@ -162,6 +225,7 @@ public class DataMgr
         } 
         return engine;
     }   
+    
 /*    
     /**
      * Regresa ScriptEngine asociado al archivo js de datasources relativo al classpath
@@ -215,6 +279,7 @@ public class DataMgr
     /**
      * Regresa ScriptEngine asociado al archivo js de datasources 
      * @param source ruta del archivo js de datasources
+     * @param session
      * @param user datos del usuario
      * @param internal si es true la ruta es relativa al classpath, de lo contrario es relativa al workpath
      * @return SWBScriptEngine

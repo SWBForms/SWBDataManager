@@ -5,6 +5,7 @@
  */
 package org.semanticwb.datamanager;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.Properties;
@@ -13,14 +14,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
+import javax.activation.FileDataSource;
 import javax.mail.Address;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import org.semanticwb.datamanager.script.ScriptObject;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 
 /**
  *
@@ -43,10 +50,19 @@ public class SWBScriptUtils {
         }));
     }
 
+    /**
+     *
+     * @param engine
+     */
     public SWBScriptUtils(SWBScriptEngine engine) {
         this.engine = engine;
     }
 
+    /**
+     *
+     * @param str
+     * @return
+     */
     public String encodeSHA(String str) {
         try {
             if (str != null && !str.startsWith("[SHA-512]")) {
@@ -101,15 +117,53 @@ public class SWBScriptUtils {
         return Session.getInstance(props);
     }
 
+    /**
+     *
+     * @param to
+     * @param subject
+     * @param msg
+     * @return
+     */
     public boolean sendMail(String to, String subject, String msg) {
         return sendMail(to, null,subject, msg, "text/plain", null);
     }
     
+    /**
+     *
+     * @param to
+     * @param subject
+     * @param msg
+     * @return
+     */
     public boolean sendHtmlMail(String to, String subject, String msg) {
         return sendMail(to, null,subject, "<html><body>" + msg + "</body></html>", "text/html", null);    
     }    
     
+    /**
+     *
+     * @param to
+     * @param toName
+     * @param subject
+     * @param message
+     * @param contentType
+     * @param callback
+     * @return
+     */
     public boolean sendMail(String to, String toName, String subject, String message, String contentType, Consumer callback) {
+        return sendMail(to, toName, subject, message, contentType, null, callback);
+    }    
+    
+    /**
+     *
+     * @param to
+     * @param toName
+     * @param subject
+     * @param message
+     * @param contentType
+     * @param callback
+     * @return
+     */
+    public boolean sendMail(String to, String toName, String subject, String message, String contentType, File attaches[], Consumer callback) {
         Properties props = new Properties();
         ScriptObject config = engine.getScriptObject().get("config");
         if (config != null) {
@@ -139,21 +193,46 @@ public class SWBScriptUtils {
 
                 try {
                     Session session = Session.getInstance(props);
-                    InternetAddress userAddr = toName==null?new InternetAddress(to):new InternetAddress(to,toName);
-
+                    InternetAddress userAddrs[] = InternetAddress.parse(to);
+                                        
                     Message msg = new MimeMessage(session);
                     Address[] addrs = new Address[]{new InternetAddress(from, fromName)};
                     msg.addFrom(addrs);
                     msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
                     msg.setSubject(subject);
-                    msg.setDataHandler(new DataHandler(message, contentType));
+                    
+                    //msg.setDataHandler(new DataHandler(message, contentType));
+                    
+                    // Create a multipar message
+                    Multipart multipart = new MimeMultipart();                    
+                    
+                    // Create the message part
+                    BodyPart htmlBodyPart = new MimeBodyPart();
+                    htmlBodyPart.setContent(message , contentType);
+                    multipart.addBodyPart(htmlBodyPart);
+
+                    if(attaches!=null)
+                    {
+                        for(int x=0;x<attaches.length;x++)
+                        {
+                            // Part two is attachment
+                            BodyPart fileBodyPart = new MimeBodyPart();
+                            DataSource source = new FileDataSource(attaches[x]);
+                            fileBodyPart.setDataHandler(new DataHandler(source));
+                            fileBodyPart.setFileName(attaches[x].getName());
+                            multipart.addBodyPart(fileBodyPart);
+                        }
+                    }
+
+                    // Send the complete message parts
+                    msg.setContent(multipart);
                     
                     proccessor.submit(() -> 
                     {
                         try {
                             Transport t = session.getTransport(transport);
                             t.connect(host, port, user, passwd);
-                            t.sendMessage(msg, (new Address[]{userAddr}));
+                            t.sendMessage(msg, userAddrs);
                             t.close();
                             if(callback!=null)callback.accept(null);
                         } catch (MessagingException uex) {
@@ -168,7 +247,5 @@ public class SWBScriptUtils {
         }
         return false;
     }
-
-
 
 }

@@ -16,17 +16,63 @@ import org.semanticwb.datamanager.SWBDataSource;
  */
 public interface SWBDataStore 
 {
+
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObjectIterator find(DataObject json, SWBDataSource dataSource) throws IOException;
     
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObject fetch(DataObject json, SWBDataSource dataSource) throws IOException;
 
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObject aggregate(DataObject json, SWBDataSource dataSource) throws IOException;
     
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObject add(DataObject json, SWBDataSource dataSource) throws IOException;
 
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObject remove(DataObject json, SWBDataSource dataSource) throws IOException;
 
+    /**
+     *
+     * @param json
+     * @param dataSource
+     * @return
+     * @throws IOException
+     */
     public DataObject update(DataObject json, SWBDataSource dataSource) throws IOException;
 
+    /**
+     *
+     */
     public void close();
 }

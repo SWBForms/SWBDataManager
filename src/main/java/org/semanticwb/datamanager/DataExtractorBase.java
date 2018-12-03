@@ -16,10 +16,42 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public interface DataExtractorBase
 {
+
+    /**
+     *
+     * @param data
+     * @throws IOException
+     */
     public void store(DataObject data) throws IOException;
+
+    /**
+     *
+     * @param data
+     * @throws IOException
+     */
     public void store(ScriptObjectMirror data) throws IOException;
+
+    /**
+     *
+     * @return
+     */
     public String getName();
+
+    /**
+     *
+     * @return
+     */
     public SWBScriptEngine getScriptEngine();
+
+    /**
+     *
+     * @return
+     */
     public ScriptObject getScriptObject();
+
+    /**
+     *
+     * @return
+     */
     public SWBDataSource getDataSource();
 }

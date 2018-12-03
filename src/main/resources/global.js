@@ -10,6 +10,8 @@ var eng = {
     dataExtractors:{},                  //DataExtractors
     fileSources: {},
     routes:{},
+    _requires:[],
+    isServerSide:true,
     getDataSource:function()
     {
         return {
@@ -26,8 +28,29 @@ var eng = {
         {
             var i=source.indexOf("?");
             if(i>-1)source=source.substring(0,i);
-            load(DataMgr.getApplicationPath()+source);
+
+            if(eng._requires.indexOf(source)==-1)
+            {
+                if(source==="/admin/admin_db.js")
+                {
+                    //print("build:"+source);  
+                    var AdminUtils = Java.type('org.semanticwb.swbforms.admin.AdminUtils');
+                    var script=AdminUtils.getDataSourceScriptFromDB(null,false);
+                    //print(script);
+                    eval(script);                
+                }else
+                {
+                    //print("load:"+source);            
+                    load(DataMgr.getApplicationPath()+source);
+                }
+                eng._requires.push(source);
+                return true;
+            }else
+            {
+                //print("noLoad:"+source);
+            }
         }catch(e){print(e);}
+        return false;
     }
 };
 

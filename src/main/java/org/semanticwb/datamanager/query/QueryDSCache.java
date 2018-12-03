@@ -23,6 +23,11 @@ public class QueryDSCache {
     private HashMap<String,DataObject> data=new HashMap();
     private int totalRows;
 
+    /**
+     *
+     * @param ds
+     * @throws IOException
+     */
     public QueryDSCache(SWBDataSource ds) throws IOException
     {
         this.ds = ds;
@@ -45,6 +50,12 @@ public class QueryDSCache {
         }
     }
     
+    /**
+     *
+     * @param id
+     * @return
+     * @throws IOException
+     */
     public DataObject getRecord(String id) throws IOException
     {
         DataObject obj=data.get(id);
@@ -55,11 +66,19 @@ public class QueryDSCache {
         return obj;
     }
     
+    /**
+     *
+     * @return
+     */
     public int size()
     {
         return data.size();
     }
 
+    /**
+     *
+     * @return
+     */
     public int getTotalRows() {
         return totalRows;
     }

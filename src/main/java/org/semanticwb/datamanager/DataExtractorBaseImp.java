@@ -30,6 +30,12 @@ public class DataExtractorBaseImp implements DataExtractorBase
     private Timer timer=null;
     private DataExtractor extractor=null;
 
+    /**
+     *
+     * @param name
+     * @param script
+     * @param engine
+     */
     protected DataExtractorBaseImp(String name, ScriptObject script, SWBScriptEngine engine)
     {
         this.name=name;
@@ -55,48 +61,94 @@ public class DataExtractorBaseImp implements DataExtractorBase
         }
     }
 
+    /**
+     *
+     * @param data
+     * @throws IOException
+     */
     public void store(DataObject data) throws IOException
     {
         dataSource.add(data);
     }
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @param name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     *
+     * @return
+     */
+    @Override
     public SWBScriptEngine getScriptEngine() {
         return scriptEngine;
     }
 
+    /**
+     *
+     * @param scriptEngine
+     */
     public void setScriptEngine(SWBScriptEngine scriptEngine) {
         this.scriptEngine = scriptEngine;
     }
 
+    /**
+     *
+     * @return
+     */
+    @Override
     public ScriptObject getScriptObject() {
         return scriptObject;
     }
 
+    /**
+     *
+     * @param scriptObject
+     */
     public void setScriptObject(ScriptObject scriptObject) {
         this.scriptObject = scriptObject;
     }
 
+    /**
+     *
+     * @return
+     */
     public SWBDataSource getDataSource() {
         return dataSource;
     }
 
+    /**
+     *
+     * @param dataSource
+     */
     public void setDataSource(SWBDataSource dataSource) {
         this.dataSource = dataSource;
     }
     
+    /**
+     *
+     * @throws IOException
+     */
     public void extract() throws IOException
     {
         extractor.extract(this);
     }
     
+    /**
+     *
+     */
     public void start()
     {
         ScriptObject t=getScriptObject().get("timer");
@@ -132,6 +184,9 @@ public class DataExtractorBaseImp implements DataExtractorBase
         extractor.start(this);
     }
     
+    /**
+     *
+     */
     public void stop()
     {
         if(timer!=null)
@@ -141,6 +196,11 @@ public class DataExtractorBaseImp implements DataExtractorBase
         extractor.stop(this);
     }    
 
+    /**
+     *
+     * @param data
+     * @throws IOException
+     */
     @Override
     public void store(ScriptObjectMirror data) throws IOException 
     {

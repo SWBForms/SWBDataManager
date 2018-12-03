@@ -43,6 +43,9 @@ public class DataObjectIterator implements Iterator
         return null;
     }
     
+    /**
+     *
+     */
     public void close()
     {        
     }

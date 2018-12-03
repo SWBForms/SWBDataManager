@@ -18,40 +18,77 @@ public class QueryObject {
     private String displayName;
     private ArrayList<QueryProperty> properties=new ArrayList();
 
+    /**
+     *
+     * @param dsName
+     * @param name
+     */
     protected QueryObject(String dsName, String name) {
         this.dsName = dsName;
         this.name = name;
     }        
     
+    /**
+     *
+     * @param property
+     */
     public void addProperty(QueryProperty property)
     {
         properties.add(property);
     }
 
+    /**
+     *
+     * @return
+     */
     public ArrayList<QueryProperty> getProperties() {
         return properties;
     }        
 
+    /**
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     *
+     * @param name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     *
+     * @param dsName
+     */
     public void setDsName(String dsName) {
         this.dsName = dsName;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getDsName() {
         return dsName;
     }
 
+    /**
+     *
+     * @return
+     */
     public String getDisplayName() {
         return displayName;
     }
 
+    /**
+     *
+     * @param displayName
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }

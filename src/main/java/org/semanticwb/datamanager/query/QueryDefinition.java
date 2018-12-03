@@ -19,9 +19,18 @@ public class QueryDefinition {
     private HashMap<String,QueryObject> objects=new HashMap();
     private HashMap<String,QueryProperty> properties=new HashMap();
 
+    /**
+     *
+     */
     public QueryDefinition() {
     }
     
+    /**
+     *
+     * @param dsname
+     * @param name
+     * @return
+     */
     public QueryDefinition addQueryObject(String dsname, String name)
     {
         QueryObject object=new QueryObject(dsname, name);
@@ -32,6 +41,13 @@ public class QueryDefinition {
         return this;
     }
     
+    /**
+     *
+     * @param dsname
+     * @param name
+     * @param value
+     * @return
+     */
     public QueryDefinition addQueryProperty(String dsname, String name, String value)
     {
         QueryProperty property=new QueryProperty(dsname, name, value);
@@ -63,14 +79,26 @@ public class QueryDefinition {
         return ret.toString();
     }
 
+    /**
+     *
+     * @return
+     */
     protected QueryObject getRoot() {
         return root;
     }
 
+    /**
+     *
+     * @return
+     */
     protected HashMap<String, QueryObject> getObjects() {
         return objects;
     }
 
+    /**
+     *
+     * @return
+     */
     protected HashMap<String, QueryProperty> getProperties() {
         return properties;
     }        

@@ -26,11 +26,20 @@ public class ScriptObject
 {
     private Object _obj;
     
+    /**
+     *
+     * @param obj
+     */
     public ScriptObject(Object obj)
     {
         this._obj=obj;
     }
     
+    /**
+     *
+     * @param key
+     * @return
+     */
     public ScriptObject get(String key)
     {
         Object o=((ScriptObjectMirror)_obj).get(key);
@@ -38,6 +47,11 @@ public class ScriptObject
         return null;
     }
     
+    /**
+     *
+     * @param key
+     * @return
+     */
     public String getString(String key)
     {
         Object o=((ScriptObjectMirror)_obj).get(key);
@@ -45,6 +59,11 @@ public class ScriptObject
         return o.toString();
     }
     
+    /**
+     *
+     * @param key
+     * @return
+     */
     public int getInt(String key)
     {
         Object o=((ScriptObjectMirror)_obj).get(key);
@@ -52,16 +71,31 @@ public class ScriptObject
         return (Integer)o;
     }    
     
+    /**
+     *
+     * @param key
+     * @return
+     */
     public boolean containsKey(String key)
     {
         return ((ScriptObjectMirror)_obj).containsKey(key);
     }    
     
+    /**
+     *
+     * @param value
+     * @return
+     */
     public boolean containsValue(Object value)
     {
         return ((ScriptObjectMirror)_obj).containsValue(value);
     }    
         
+    /**
+     *
+     * @param key
+     * @return
+     */
     public boolean delete(String key)
     {
         return ((ScriptObjectMirror)_obj).delete(key);
@@ -82,11 +116,19 @@ public class ScriptObject
         return _obj.hashCode();
     }
     
+    /**
+     *
+     * @return
+     */
     public Object getValue()
     {
         return _obj;
     }
     
+    /**
+     *
+     * @return
+     */
     public boolean isScriptObject()
     {
         if(_obj instanceof ScriptObjectMirror)
@@ -96,41 +138,73 @@ public class ScriptObject
         return false;
     }
     
+    /**
+     *
+     * @return
+     */
     public boolean isNativeObject()
     {
         return !isScriptObject();
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isArray()
     {
         return ((ScriptObjectMirror)_obj).isArray();
     }     
     
+    /**
+     *
+     * @return
+     */
     public boolean isEmpty()
     {
         return ((ScriptObjectMirror)_obj).isEmpty();
     }     
     
+    /**
+     *
+     * @return
+     */
     public boolean isFunction()
     {
         return ((ScriptObjectMirror)_obj).isFunction();
     }     
     
+    /**
+     *
+     * @return
+     */
     public Set<String> keySet()
     {
         return ((ScriptObjectMirror)_obj).keySet();
     }     
     
+    /**
+     *
+     * @return
+     */
     public int size()
     {
         return ((ScriptObjectMirror)_obj).size();
     }     
     
+    /**
+     *
+     */
     public void clear()
     {
         ((ScriptObjectMirror)_obj).clear();
     }     
     
+    /**
+     *
+     * @param key
+     * @param obj
+     */
     public void put(String key, Object obj)
     {
         if(obj instanceof ScriptObject)
@@ -142,6 +216,10 @@ public class ScriptObject
         }
     }     
         
+    /**
+     *
+     * @return
+     */
     public List<ScriptObject> values()
     {
         Iterator<Object> it=((ScriptObjectMirror)_obj).values().iterator();
@@ -153,12 +231,25 @@ public class ScriptObject
         return arr;
     }      
     
+    /**
+     *
+     * @param script
+     * @return
+     * @throws ScriptException
+     */
     public static ScriptObject parse(String script) throws ScriptException
     {        
         ScriptEngine engine=DataMgr.getNativeScriptEngine();
         return new ScriptObject(engine.eval(script));
     }
     
+    /**
+     *
+     * @param script
+     * @param engine
+     * @return
+     * @throws ScriptException
+     */
     public static ScriptObject parse(String script, ScriptEngine engine) throws ScriptException
     {        
         return new ScriptObject(engine.eval(script));
@@ -168,22 +259,41 @@ public class ScriptObject
 //    {
 //        return new ScriptObject(((ScriptObjectMirror)_obj).call(_obj, args));
 //    }
+
+    /**
+     *
+     * @param b
+     * @param args
+     * @return
+     */
     
     public ScriptObject invoke(SWBScriptEngine b, Object... args)
     {
         return new ScriptObject(((ScriptObjectMirror)_obj).call(b, args));
     }
     
+    /**
+     *
+     * @return
+     */
     public DataObject toDataObject()
     {
         return DataUtils.toDataObject((ScriptObjectMirror)_obj);
     }
     
+    /**
+     *
+     * @return
+     */
     public DataList toDataList()
     {
         return DataUtils.toDataList((ScriptObjectMirror)_obj);
     }
     
+    /**
+     *
+     * @return
+     */
     public Object toData()
     {
         return DataUtils.toData(_obj);

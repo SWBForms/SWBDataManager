@@ -27,20 +27,36 @@ public class RoutesMgr {
     
     }
 
+    /**
+     *
+     * @return
+     */
     public static String getLoginRoute() {
         return instance.loginRoute;
     }
     
+    /**
+     *
+     */
     protected static void startup()
     {
         instance = new RoutesMgr();
     }
     
+    /**
+     *
+     * @param path
+     * @return
+     */
     public static RouteData getRouteData(String path)
     {
         return instance.map.get(path);
     }
     
+    /**
+     *
+     * @param routes
+     */
     public static synchronized void parseRouter(ScriptObject routes) {
         Iterator<String> it=routes.keySet().iterator();
         while (it.hasNext()) {

@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  *
  * @author javiersolis
+ * @param <E>
  */
 public class DataList<E> extends ArrayList<E>
 {
@@ -57,12 +58,22 @@ public class DataList<E> extends ArrayList<E>
         }
     }
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public String getString(int index) {
         Object obj=get(index);
         if(obj==null)return null;
         return obj.toString();
     }
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public DataObject getDataObject(int index)
     {
         Object obj=get(index);
@@ -70,6 +81,12 @@ public class DataList<E> extends ArrayList<E>
         return null;
     }
     
+    /**
+     *
+     * @param property
+     * @param value
+     * @return
+     */
     public DataObject findDataObject(String property, Object value)
     {
         for(int x=0;x<size();x++)
@@ -80,6 +97,11 @@ public class DataList<E> extends ArrayList<E>
         return null;
     }
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public DataList getDataList(int index)
     {
         Object obj=get(index);
@@ -87,6 +109,11 @@ public class DataList<E> extends ArrayList<E>
         return null;
     }    
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public int getInt(int index)
     {
         Object obj=get(index);
@@ -101,6 +128,11 @@ public class DataList<E> extends ArrayList<E>
         return 0;
     }
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public long getLong(int index)
     {
         Object obj=get(index);
@@ -115,6 +147,11 @@ public class DataList<E> extends ArrayList<E>
         return 0;
     }   
     
+    /**
+     *
+     * @param index
+     * @return
+     */
     public boolean getBoolean(int index)
     {
         Object obj=get(index);

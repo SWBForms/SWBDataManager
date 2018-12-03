@@ -25,6 +25,12 @@ public class FileSourceMongo implements SWBFileSource {
     private final int maxSize;
     private final int cachableSize;
 
+    /**
+     *
+     * @param fileSource
+     * @param ds
+     * @throws UnknownHostException
+     */
     public FileSourceMongo(ScriptObject fileSource, ScriptObject ds) throws UnknownHostException {
         collection = fileSource.getString("scls");
         maxSize = fileSource.getInt("maxSize");
@@ -43,6 +49,11 @@ public class FileSourceMongo implements SWBFileSource {
         mongoDB = mongoClient.getDB(fileSource.getString("modelid"));
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBFileObject getFile(String name) {
         SWBFileObject ret=null;
@@ -68,6 +79,10 @@ public class FileSourceMongo implements SWBFileSource {
         return ret;
     }
 
+    /**
+     *
+     * @param file
+     */
     @Override
     public void storeFile(SWBFileObject file) {
         GridFS fs = new GridFS(mongoDB, collection);
@@ -78,6 +93,10 @@ public class FileSourceMongo implements SWBFileSource {
         inputFile.save();
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int getMaxSize() {
         return maxSize;

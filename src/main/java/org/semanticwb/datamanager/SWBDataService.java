@@ -13,11 +13,20 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public class SWBDataService 
 {
+
+    /**
+     *
+     */
     public static final String METHOD_SERVICE="service";
         
     private String name=null;
     private ScriptObject script=null;
     
+    /**
+     *
+     * @param name
+     * @param script
+     */
     protected SWBDataService(String name, ScriptObject script)
     {
         this.name=name;

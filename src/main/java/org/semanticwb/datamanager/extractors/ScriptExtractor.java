@@ -18,6 +18,11 @@ import org.semanticwb.datamanager.script.ScriptObject;
 public class ScriptExtractor implements DataExtractor
 {
 
+    /**
+     *
+     * @param base
+     * @throws IOException
+     */
     @Override
     public void extract(DataExtractorBase base) throws IOException
     {
@@ -36,6 +41,10 @@ public class ScriptExtractor implements DataExtractor
         }        
     }
 
+    /**
+     *
+     * @param base
+     */
     @Override
     public void start(DataExtractorBase base) {
         ScriptObject extractor=base.getScriptObject().get("extractor");
@@ -62,6 +71,10 @@ public class ScriptExtractor implements DataExtractor
         }
     }
 
+    /**
+     *
+     * @param base
+     */
     @Override
     public void stop(DataExtractorBase base) {
         ScriptObject extractor=base.getScriptObject().get("extractor");

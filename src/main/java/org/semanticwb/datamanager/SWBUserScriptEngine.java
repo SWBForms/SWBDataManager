@@ -27,6 +27,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
     DataObject user=null;
     javax.servlet.http.HttpSession session=null;
     
+    /**
+     *
+     * @param engine
+     * @param session
+     */
     public SWBUserScriptEngine(SWBBaseScriptEngine engine, javax.servlet.http.HttpSession session)
     {
         this.engine=engine;
@@ -37,22 +42,42 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }        
     }
     
+    /**
+     *
+     * @param engine
+     * @param user
+     */
     public SWBUserScriptEngine(SWBBaseScriptEngine engine, DataObject user)
     {
         this.engine=engine;
         this.user=user;
     }
 
+    /**
+     *
+     */
     @Override
     public void chechUpdates() {
         engine.chechUpdates();
     }
 
+    /**
+     *
+     * @param script
+     * @return
+     * @throws ScriptException
+     */
     @Override
     public Object eval(String script) throws ScriptException {
         return engine.eval(script,engine.getUserBindings(this));
     }
 
+    /**
+     *
+     * @param script
+     * @return
+     * @throws ScriptException
+     */
     @Override
     public Object eval(Reader script) throws ScriptException {
         return engine.eval(script,engine.getUserBindings(this));        
@@ -68,6 +93,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return engine.findDataServices(dataSource, action);
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBDataSource getDataSource(String name)
     {
@@ -79,6 +109,12 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return null;
     }
     
+    /**
+     *
+     * @param name
+     * @param modelid
+     * @return
+     */
     @Override
     public SWBDataSource getDataSource(String name, String modelid)
     {
@@ -90,11 +126,20 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return null;
     }    
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBDataStore getDataStore(String name) {
         return engine.getDataStore(name);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public ScriptEngine getNativeScriptEngine() {
         return engine.getNativeScriptEngine();
@@ -104,61 +149,126 @@ public class SWBUserScriptEngine implements SWBScriptEngine
 //        return engine.getUserRepository();
 //    }
 
+    /**
+     *
+     * @param dataSource
+     * @param action
+     * @param method
+     * @param obj
+     * @return
+     */
+
     @Override
     public DataObject invokeDataProcessors(String dataSource, String action, String method, DataObject obj) {
         return engine.invokeDataProcessors(this,dataSource, action, method, obj);
     }
 
+    /**
+     *
+     * @param dataSource
+     * @param action
+     * @param request
+     * @param response
+     */
     @Override
     public void invokeDataServices(String dataSource, String action, DataObject request, DataObject response) {
         engine.invokeDataServices(this, dataSource, action, request, response);
     }
 
+    /**
+     *
+     */
     @Override
     public void reloadScriptEngine() {
         engine.reloadScriptEngine();
     }
+    
+    /**
+     *
+     */
+    @Override
+    public void needsReloadScriptEngine()
+    {
+        engine.needsReloadScriptEngine();
+    }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public DataObject getUser() {
         return user;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public Bindings getUserBindings() {
         return engine.getUserBindings(this);
     }
     
+    /**
+     *
+     * @return
+     */
     @Override
     public SWBScriptUtils getUtils() {
         return engine.getUtils();
     } 
     
+    /**
+     *
+     * @return
+     */
     @Override
     public ScriptObject getScriptObject() {
         return engine.getScriptObject();
     }
 
+    /**
+     *
+     */
     @Override
     public void close() {
         engine.close();
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean isClosed() {
         return engine.isClosed();
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBFileSource getFileSource(String name) {
         return engine.getFileSource(name);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public Set<String> getDataSourceNames() {
         return engine.getDataSourceNames();
     }
     
+    /**
+     *
+     * @param key
+     * @return
+     */
     public Object getContextData(String key)
     {
         if(session!=null)
@@ -167,6 +277,12 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }return null;
     }
     
+    /**
+     *
+     * @param key
+     * @param data
+     * @return
+     */
     public Object setContextData(String key, Object data)
     {
         Object ret=null;
@@ -178,6 +294,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return ret;
     }     
 
+    /**
+     *
+     * @param role
+     * @return
+     */
     @Override
     public boolean hasUserRole(String role) {
         DataObject user=getUser();
@@ -192,6 +313,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return false;
     }
     
+    /**
+     *
+     * @param roles
+     * @return
+     */
     @Override
     public boolean hasUserAnyRole(String... roles) {
         if(roles!=null)
@@ -204,6 +330,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return false;
     }
     
+    /**
+     *
+     * @param roles
+     * @return
+     */
     @Override
     public boolean hasUserAnyRole(List<String> roles) {
         if(roles!=null)
@@ -216,6 +347,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return false;
     }    
 
+    /**
+     *
+     * @param group
+     * @return
+     */
     @Override
     public boolean hasUserGroup(String group) {
         DataObject user=getUser();
@@ -230,6 +366,9 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return false;        
     }
     
+    /**
+     *
+     */
     @Override
     public void removeUserPermissionCache()
     {
@@ -239,6 +378,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }
     }    
     
+    /**
+     *
+     * @return
+     * @throws IOException
+     */
     protected DataObject getUserPermissions() throws IOException
     {        
         DataObject permissions=null;
@@ -266,6 +410,11 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         return permissions;
     }
     
+    /**
+     *
+     * @param permission
+     * @return
+     */
     @Override
     public boolean hasUserPermission(String permission)
     {        
@@ -286,9 +435,64 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         }
     }   
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String getAppName() {
         return engine.getAppName();
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public long getId() {
+        return engine.getId();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void needsReloadAllScriptEngines() {
+        engine.needsReloadAllScriptEngines();
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void reloadAllScriptEngines() {
+        engine.reloadAllScriptEngines();
+    }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean isNeedsReloadScriptEngine() {
+        return engine.isNeedsReloadScriptEngine();
+    }
+
+    @Override
+    public DataObject fetchObjectById(String id) throws IOException
+    {
+        //"_suri:"+modelid+":"+scls+":";
+        String ids[]=id.split(":");
+        if(ids.length==4)return getDataSource(ids[2], ids[1]).fetchObjById(id);
+        return null;
+    }
+
+    @Override
+    public DataObject getObjectById(String id) {
+        //"_suri:"+modelid+":"+scls+":";
+        String ids[]=id.split(":");
+        if(ids.length==4)return getDataSource(ids[2], ids[1]).getObjectById(id);
+        return null;        
     }
     
     

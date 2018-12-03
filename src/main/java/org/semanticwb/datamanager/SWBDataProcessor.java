@@ -12,13 +12,26 @@ import org.semanticwb.datamanager.script.ScriptObject;
  */
 public class SWBDataProcessor 
 {
+
+    /**
+     *
+     */
     public static final String METHOD_REQUEST="request";
+
+    /**
+     *
+     */
     public static final String METHOD_RESPONSE="response";
     
     
     private String name=null;
     private ScriptObject script=null;
     
+    /**
+     *
+     * @param name
+     * @param script
+     */
     protected SWBDataProcessor(String name, ScriptObject script)
     {
         this.name=name;

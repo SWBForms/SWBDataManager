@@ -18,24 +18,45 @@ public class RouteData
     private Object handler;
     private boolean secure;
     
+    /**
+     *
+     * @param scriptObject
+     * @param handler
+     */
     public RouteData(ScriptObject scriptObject, Object handler) {
         this.scriptObject = scriptObject;
         this.handler = handler;
         secure="true".equalsIgnoreCase(scriptObject.getString("isRestricted"));
     }
 
+    /**
+     *
+     * @return
+     */
     public boolean isSecure() {
         return secure;
     }
 
+    /**
+     *
+     * @return
+     */
     public ScriptObject getScriptObject() {
         return scriptObject;
     }
 
+    /**
+     *
+     * @return
+     */
     public Object getHandler() {
         return handler;
     }
 
+    /**
+     *
+     * @param handler
+     */
     public void setHandler(Object handler) {
         this.handler = handler;
     }

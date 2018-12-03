@@ -18,20 +18,33 @@ public class DataObjectIteratorMongo extends DataObjectIterator
 {
     private DBCursor cursor=null;
     private int total=0;
+    private boolean closed=false;
 
+    /**
+     *
+     * @param cursor
+     * @param total
+     */
     public DataObjectIteratorMongo(DBCursor cursor, int total) 
     {
         this.cursor=cursor;
         this.total=total;
     }
 
+    /**
+     *
+     * @return
+     */
     public int getTotal() {
         return total;
     }
     
     @Override
     public boolean hasNext() {
-        return cursor.hasNext();
+        if(closed)return false;
+        boolean ret=cursor.hasNext();
+        if(!ret)close();
+        return ret;
     }
 
     @Override
@@ -49,8 +62,15 @@ public class DataObjectIteratorMongo extends DataObjectIterator
         return cursor.count();
     }
     
+    /**
+     *
+     */
     public void close()
     {
-        cursor.close();
+        if(!closed)
+        {
+            cursor.close();
+            closed=true;
+        }
     }
 }

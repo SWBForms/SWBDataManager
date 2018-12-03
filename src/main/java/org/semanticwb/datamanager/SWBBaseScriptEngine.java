@@ -6,6 +6,7 @@ package org.semanticwb.datamanager;
 
 import com.mongodb.util.JSON;
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -50,14 +51,14 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     private ScriptEngine sengine=null;
     private ScriptObject sobject=null;
     private String source=null;    
+    private transient long id;
     private transient long lastCheck;
     
     private ArrayList<SWBScriptFile> files=new ArrayList();
+    private boolean needsReload=false;
     //private File file=null;    
     //private transient long updated;
-    
-    private static final List _emptyList_=new ArrayList();
-    
+        
     private boolean closed=false;
     private boolean internalSource=false;
     
@@ -76,11 +77,12 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     
     private void init()
     {
-        logger.log(Level.INFO,"Loading ScriptEngine: "+source);
+        logger.log(Level.INFO,"Initializing ScriptEngine: "+source);
         try
         {
             utils=new SWBScriptUtils(this);
             lastCheck=System.currentTimeMillis();  
+            id=lastCheck;
             
             ArrayList<String> sources=new ArrayList();
             if(!source.equals("[GLOBAL]"))
@@ -175,7 +177,6 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
             //Load DataSources
             {
                 HashMap<String,ScriptObject> dataSources=new HashMap();
-                this.sengine=engine;
                 this.dataSources=dataSources;            
                 ScriptObject dss=eng.get("dataSources");   
                 Iterator<String> it=dss.keySet().iterator();
@@ -383,21 +384,39 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         }           
     }    
     
+    /**
+     *
+     * @param name
+     * @return
+     */
     public ScriptObject getDataSourceScript(String name)
     {
         return dataSources.get(name);
     }
     
+    /**
+     *
+     * @return
+     */
     public ScriptObject getScriptObject()
     {
         return sobject;
     }
     
+    /**
+     *
+     * @return
+     */
     public Set<String> getDataSourceNames()
     {
         return dataSources.keySet();   
     }
     
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBDataSource getDataSource(String name)
     {
@@ -409,6 +428,12 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return null;
     }
     
+    /**
+     *
+     * @param name
+     * @param modelid
+     * @return
+     */
     @Override
     public SWBDataSource getDataSource(String name, String modelid)
     {
@@ -420,6 +445,11 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return null;
     }    
     
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBDataStore getDataStore(String name)
     {
@@ -438,12 +468,27 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return dataServices.get(dataSource+"-"+action);
     }
     
+    /**
+     *
+     * @param dataSource
+     * @param action
+     * @param request
+     * @param response
+     */
     @Override
     public void invokeDataServices(String dataSource, String action, DataObject request, DataObject response)
     {
         invokeDataServices(this, dataSource, action, request, response);
     }
        
+    /**
+     *
+     * @param userengine
+     * @param dataSource
+     * @param action
+     * @param request
+     * @param response
+     */
     protected void invokeDataServices(SWBScriptEngine userengine, String dataSource, String action, DataObject request, DataObject response)
     {
         List<SWBDataService> list=findDataServices(dataSource, action);
@@ -487,13 +532,29 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return dataProcessors.get(dataSource+"-"+action);
     }   
 
+    /**
+     *
+     * @param dataSource
+     * @param action
+     * @param method
+     * @param obj
+     * @return
+     */
     @Override
     public DataObject invokeDataProcessors(String dataSource, String action, String method, DataObject obj)
     {
         return invokeDataProcessors(this, dataSource, action, method, obj);
     }
     
-    
+    /**
+     *
+     * @param userengine
+     * @param dataSource
+     * @param action
+     * @param method
+     * @param obj
+     * @return
+     */
     protected DataObject invokeDataProcessors(SWBScriptEngine userengine, String dataSource, String action, String method, DataObject obj)
     {
         List<SWBDataProcessor> list=findDataProcessors(dataSource, action);
@@ -527,12 +588,30 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return obj;
     }
     
-    
+    /**
+     *
+     */
     @Override
     public void reloadScriptEngine()
     {
         try
         {
+            close();
+            
+            dataSources.clear();
+            fileSources.clear();
+            dataExtractors.clear();
+            dataServices.clear();
+            dataProcessors.clear();
+            
+            sengine=null;
+            sobject=null;
+    
+            files.clear();
+            needsReload=false;
+            closed=false;
+            utils=null;        
+            
             init();
         }catch(Exception e)
         {
@@ -540,50 +619,145 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         }
     }
     
+    /**
+     *
+     */
+    public void needsReloadAllScriptEngines()
+    {
+        Iterator<SWBBaseScriptEngine> it=engines.values().iterator();
+        while (it.hasNext()) {
+            SWBBaseScriptEngine eng = it.next();
+            eng.needsReloadScriptEngine();
+        }        
+    }
+    
+    /**
+     *
+     */
+    public void reloadAllScriptEngines()
+    {
+        Iterator<SWBBaseScriptEngine> it=engines.values().iterator();
+        while (it.hasNext()) {
+            SWBBaseScriptEngine eng = it.next();
+            eng.reloadScriptEngine();
+        }        
+    }        
+    
+    /**
+     * Mark script engine as changed for reload
+     */
+    public void needsReloadScriptEngine()
+    {
+        this.needsReload=true;
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public boolean isNeedsReloadScriptEngine()
+    {
+        return needsReload;
+    }
+    
+    /**
+     *
+     * @return
+     */
     @Override
     public ScriptEngine getNativeScriptEngine()
     {
         return sengine;
     }
     
+    /**
+     *
+     * @param script
+     * @return
+     * @throws ScriptException
+     */
     @Override
     public Object eval(String script) throws ScriptException
     {
         return sengine.eval(script);
     }
     
+    /**
+     *
+     * @param script
+     * @param bind
+     * @return
+     * @throws ScriptException
+     */
     protected Object eval(String script, Bindings bind) throws ScriptException
     {
         return sengine.eval(script, bind);
     }
     
+    /**
+     *
+     * @param script
+     * @return
+     * @throws ScriptException
+     */
     @Override
     public Object eval(Reader script) throws ScriptException
     {
         return sengine.eval(script);
     }    
     
+    /**
+     *
+     * @param script
+     * @param bind
+     * @return
+     * @throws ScriptException
+     */
     protected Object eval(Reader script, Bindings bind) throws ScriptException
     {
         return sengine.eval(script,bind);
     }        
     
+    /**
+     *
+     */
     @Override
     public void chechUpdates()
     {
-        long time=System.currentTimeMillis();
-        if((time-lastCheck)>10000)
+/*        
+        //Se movio a admin_db.js.jsp
+        if(needsReload)
         {
-            lastCheck=time;
-            Iterator<SWBScriptFile> it=files.iterator();
-            while (it.hasNext()) {
-                SWBScriptFile f = it.next();
-                if(f.chechUpdates())break;
+            synchronized(this)
+            {
+                if(needsReload)
+                {
+                    needsReload=false;
+                    logger.log(Level.INFO,"remove ScriptEngine:"+source);
+                    reloadScriptEngine();
+                }
+            }
+        }else
+*/        
+        {
+            long time=System.currentTimeMillis();
+            if((time-lastCheck)>10000)
+            {
+                lastCheck=time;
+                Iterator<SWBScriptFile> it=files.iterator();
+                while (it.hasNext()) {
+                    SWBScriptFile f = it.next();
+                    if(f.chechUpdates())break;
+                }
             }
         }
     }
     
-   
+    /**
+     *
+     * @param engine
+     * @return
+     */
     public Bindings getUserBindings(SWBUserScriptEngine engine)
     {
         Bindings b=null;
@@ -614,15 +788,26 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return b;        
     }
 
+    /**
+     *
+     * @return
+     */
     public Bindings getUserBindings() {
         return null;
     }   
 
+    /**
+     *
+     * @return
+     */
     @Override
     public SWBScriptUtils getUtils() {
         return utils;
     }
     
+    /**
+     *
+     */
     @Override
     public void close() {
         if(!closed)
@@ -633,26 +818,50 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
                 {
                     closed=true;
                     dataExtractorsStop();
+                    
+                    //DataStores..
+                    Iterator<SWBDataStore> it=dataStores.values().iterator();
+                    while (it.hasNext()) {
+                        SWBDataStore next = it.next();
+                        next.close();
+                    }
+                    
                     logger.log(Level.INFO,"Closed ScriptEngine: "+source);
                 }
             }
         }
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public boolean isClosed() {
         return closed;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public DataObject getUser() {
         return null;
     }    
     
 //******************************** static *****************************************************//    
+
+    /**
+     *
+     * @param source
+     * @param internal
+     * @return
+     */
     
     public static SWBBaseScriptEngine getScriptEngine(String source, boolean internal)
     {
+        //System.out.println("getScriptEngine:"+source);
         SWBBaseScriptEngine engine=engines.get(source);        
         if(engine==null)
         {
@@ -679,52 +888,100 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         return engine;
     }
 
+    /**
+     *
+     * @param name
+     * @return
+     */
     @Override
     public SWBFileSource getFileSource(String name) {
         return fileSources.get(name);
     }
 
+    /**
+     *
+     * @param key
+     * @return
+     */
     @Override
     public Object getContextData(String key) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     *
+     * @param key
+     * @param data
+     * @return
+     */
     @Override
     public Object setContextData(String key, Object data) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    /**
+     *
+     * @param role
+     * @return
+     */
     @Override
     public boolean hasUserRole(String role) {
         return false;
     }
     
+    /**
+     *
+     * @param roles
+     * @return
+     */
     @Override
     public boolean hasUserAnyRole(String... roles)
     {
         return false;
     }
     
+    /**
+     *
+     * @param roles
+     * @return
+     */
     @Override
     public boolean hasUserAnyRole(List<String> roles)
     {
         return false;
     }
 
+    /**
+     *
+     * @param group
+     * @return
+     */
     @Override
     public boolean hasUserGroup(String group) {
         return false;
     }
 
+    /**
+     *
+     */
     @Override
     public void removeUserPermissionCache() {        
     }
 
+    /**
+     *
+     * @param permission
+     * @return
+     */
     @Override
     public boolean hasUserPermission(String permission) {
         return false;
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public String getAppName() {
         ScriptObject config = getScriptObject().get("config");
@@ -733,17 +990,54 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         }
         return null;
     }
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    public long getId() {
+        return id;
+    }
+
+    @Override
+    public DataObject fetchObjectById(String id) throws IOException
+    {
+        //"_suri:"+modelid+":"+scls+":";
+        String ids[]=id.split(":");
+        if(ids.length==4)return getDataSource(ids[2], ids[1]).fetchObjById(id);
+        return null;
+    }
+
+    @Override
+    public DataObject getObjectById(String id) {
+        //"_suri:"+modelid+":"+scls+":";
+        String ids[]=id.split(":");
+        if(ids.length==4)return getDataSource(ids[2], ids[1]).getObjectById(id);
+        return null;        
+    }
     
+    /**
+     *
+     */
     public class SWBScriptFile
     {
         private File file=null;      
         private transient long updated;    
 
+        /**
+         *
+         * @param file
+         */
         public SWBScriptFile(File file) {
             this.file=file;
             this.updated=file.lastModified();
         }
         
+        /**
+         *
+         * @return
+         */
         public boolean chechUpdates()
         {
             if(file!=null && updated!=file.lastModified())

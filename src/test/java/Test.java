@@ -16,10 +16,19 @@ import java.util.function.Consumer;
  * @author javiersolis
  */
 public class Test {
+
+    /**
+     *
+     * @param args
+     */
     public static void main2(String[] args) {
         System.out.println(String.format("%04d", 30));
     }
     
+    /**
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         LinkedHashMap<String,Integer> map=new LinkedHashMap<String,Integer>();
         map.put("Javier", 43);
@@ -45,5 +54,13 @@ public class Test {
             Map.Entry<String, Integer> next = it.next();
             System.out.println(next.getKey()+" "+next.getValue());
         }
+        
+        String id="_suri:urban:DataService:d";
+        String ids[]=id.split(":");
+        for(int x=0;x<ids.length;x++)
+        {
+            System.out.println("x:"+x+"-"+ids[x]);
+        }
+        
     }
 }

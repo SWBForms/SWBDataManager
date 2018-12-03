@@ -4,16 +4,24 @@
  */
 package org.semanticwb.datamanager;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
+import java.util.TimeZone;
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
 import org.semanticwb.datamanager.script.ScriptObject;
+import org.semanticwb.datamanager.utils.SimpleDateFormatTS;
 
 /**
  *
@@ -29,7 +37,19 @@ public class DataUtils {
     {
         return new org.bson.types.ObjectId().toString();
     }
-
+    
+    /**
+     *
+     * @param txt
+     * @param def
+     * @return
+     */
+    public static String validate(String txt, String def)
+    {
+        if(txt!=null) return txt;
+        return def;
+    }
+        
     /**
      * Lee el contenido del InputStream y lo convierte a un String
      *
@@ -130,6 +150,13 @@ public class DataUtils {
         out.close();
     }    
     
+    /**
+     *
+     * @param arr
+     * @param prop
+     * @param value
+     * @return
+     */
     public static ScriptObject getArrayNode(ScriptObject arr, String prop, String value) {
         if (arr != null) {
             Iterator<ScriptObject> it1 = arr.values().iterator();
@@ -144,6 +171,13 @@ public class DataUtils {
         return null;
     }
     
+    /**
+     *
+     * @param arr
+     * @param prop
+     * @param value
+     * @return
+     */
     public static ArrayList<ScriptObject> getArrayNodes(ScriptObject arr, String prop, String value) {
         ArrayList<ScriptObject> ret=new ArrayList();
         if (arr != null) {
@@ -159,6 +193,11 @@ public class DataUtils {
         return ret;
     }    
 
+    /**
+     *
+     * @param str
+     * @return
+     */
     public static String encodeSHA(String str) 
     {
         try
@@ -185,6 +224,11 @@ public class DataUtils {
         return str;
     }
     
+    /**
+     *
+     * @param obj
+     * @return
+     */
     public static Object toData(Object obj)
     {
         if(obj instanceof jdk.nashorn.internal.objects.NativeArray)
@@ -208,6 +252,11 @@ public class DataUtils {
         return obj;  
     }      
     
+    /**
+     *
+     * @param obj
+     * @return
+     */
     public static DataList toDataList(ScriptObjectMirror obj)
     {
         DataList ret=new DataList();
@@ -218,6 +267,11 @@ public class DataUtils {
         return ret;        
     }
     
+    /**
+     *
+     * @param obj
+     * @return
+     */
     public static DataObject toDataObject(ScriptObjectMirror obj)
     {
         if(obj==null)return null;
@@ -233,7 +287,7 @@ public class DataUtils {
     /**
      * Map data source with keyField like a key and _id like a value
      * @param ds
-     * @param field
+     * @param keyField
      * @return
      * @throws IOException 
      */
@@ -299,10 +353,61 @@ public class DataUtils {
         }while(true);
         
         return map;
-    }        
+    }   
     
+    /**
+     *
+     */
+    public static class HTTP
+    {          
+        /**
+         *
+         * @param url
+         * @return
+         * @throws IOException
+         */
+        public static String httpGet(String url) throws IOException
+        {
+            return httpGet(url, 0);
+        }
+
+        /**
+         * 
+         * @param url
+         * @param timeout in miliseconds
+         * @return
+         * @throws IOException 
+         */
+        public static String httpGet(String url, int timeout) throws IOException
+        {
+            StringBuilder ret=new StringBuilder();
+            URL url1=new URL(url);
+            URLConnection con=url1.openConnection();
+            if(timeout>0)
+            {
+                con.setConnectTimeout(timeout);
+                con.setReadTimeout(timeout);
+            }
+            con.setRequestProperty("User-Agent", "Mozilla/5.0");
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream()))) 
+            {
+                String inputLine;
+                while ((inputLine = br.readLine()) != null) {
+                    ret.append(inputLine);
+                }
+            }
+
+            return ret.toString();            
+        }
+    }
+    
+    /**
+     *
+     */
     public static class TEXT
     {    
+        private static SimpleDateFormatTS iso8601dateFormat = new SimpleDateFormatTS("yyyy-MM-dd'T'HH:mm:ss'.'SSS", null, TimeZone.getTimeZone("UTC"));
+        
         /**
          * Finds the substrings delimited by two given strings, inside another
          * string.
@@ -371,7 +476,383 @@ public class DataUtils {
                 }
             }
             return -1;
+        }   
+            
+        
+
+        /**
+         * Gets the difference in time between one date given and the system
+         * date. This difference is expressed in the biggest unit of time
+         * possible. These units of time being: seconds, minutes, hours, days,
+         * months and years.
+         * <p>
+         * Obtiene la diferencia en tiempo entre una fecha dada y la fecha del
+         * sistema. Esta diferencia se expresa en la unidad de tiempo m&aacute;s
+         * grande posible. Las unidades de tiempo manejadas son: segundos,
+         * minutos, horas, d&iacute;s, meses y a&ntilde;os.</p>
+         *
+         * @param CreationDate the date to compare
+         * @param lang a string indicating the language in which the date is
+         * going to be presented
+         * @return a string representing the difference between the date given
+         * and the system's date, expressed in the biggest unit of time
+         * possible. un objeto string que representa la diferencia entre la
+         * fecha dada y la fecha del sistema, expresada en la unidad de tiempo
+         * m&aacute;s grande posible.
+         */
+        public static String getTimeAgo(Date CreationDate, String lang)
+        {
+            return getTimeAgo(new Date(), CreationDate, lang);
+        }
+
+        /**
+         * Gets the difference in time between two dates given. This difference
+         * is expressed in the biggest unit of time possible. These units of
+         * time being: seconds, minutes, hours, days, months and years.
+         * <p>
+         * Obtiene la diferencia en tiempo entre dos fechas dadas. Esta
+         * diferencia se expresa en la unidad de tiempo m&aacute;s grande
+         * posible. Las unidades de tiempo manejadas son: segundos, minutos,
+         * horas, d&iacute;s, meses y a&ntilde;os.</p>
+         *
+         * @param CurrentDate the most recent date to compare
+         * @param CreationDate the oldest date to compare
+         * @param lang a string indicating the language in which the date is
+         * going to be presented
+         * @return a string representing the difference between the two dates
+         * given, expressed in the biggest unit of time possible. un objeto
+         * string que representa la diferencia entre dos fechas dadas, expresada
+         * en la unidad de tiempo m&aacute;s grande posible.
+         */
+        public static String getTimeAgo(Date CurrentDate, Date CreationDate, String lang)
+        {
+            String ret = "";
+            int second;
+            int secondCurrent;
+            int secondCreation;
+            int minute;
+            int minuteCurrent;
+            int minuteCreation;
+            int hour;
+            int hourCurrent;
+            int hourCreation;
+            int day;
+            int dayCurrent;
+            int dayCreation;
+            int month;
+            int monthCurrent;
+            int monthCreation;
+            int year;
+            int yearCurrent;
+            int yearCreation;
+            int dayMonth;
+
+            secondCurrent = CurrentDate.getSeconds();
+            secondCreation = CreationDate.getSeconds();
+            minuteCurrent = CurrentDate.getMinutes();
+            minuteCreation = CreationDate.getMinutes();
+            hourCurrent = CurrentDate.getHours();
+            hourCreation = CreationDate.getHours();
+            dayCurrent = CurrentDate.getDate();
+            dayCreation = CreationDate.getDate();
+            monthCurrent = CurrentDate.getMonth();
+            monthCreation = CreationDate.getMonth();
+            yearCurrent = CurrentDate.getYear();
+            yearCreation = CreationDate.getYear();
+
+            boolean leapYear = false;
+            if (monthCurrent > 1 || (dayCreation == 29 && monthCreation == 1))
+            {
+                leapYear = (yearCreation % 4 == 0) && (yearCreation % 100 != 0 || yearCreation % 400 == 0);
+            }
+            dayMonth = 0;
+            day = 0;
+            switch (monthCreation)
+            {
+                case 0:
+                    dayMonth = 31;
+                    break;
+                case 1:
+                    if (leapYear)
+                    {
+                        dayMonth = 29;
+                    }
+                    else
+                    {
+                        dayMonth = 28;
+                    }
+                    break;
+                case 2:
+                    dayMonth = 31;
+                    break;
+                case 3:
+                    dayMonth = 30;
+                    break;
+                case 4:
+                    dayMonth = 31;
+                    break;
+                case 5:
+                    dayMonth = 30;
+                    break;
+                case 6:
+                    dayMonth = 31;
+                    break;
+                case 7:
+                    dayMonth = 31;
+                    break;
+                case 8:
+                    dayMonth = 30;
+                    break;
+                case 9:
+                    dayMonth = 31;
+                    break;
+                case 10:
+                    dayMonth = 30;
+                    break;
+                case 11:
+                    dayMonth = 31;
+                    break;
+            }
+            if (secondCurrent >= secondCreation)
+            {
+                second = secondCurrent - secondCreation;
+            }
+            else
+            {
+                second = (60 - secondCreation) + secondCurrent;
+                minuteCurrent = minuteCurrent - 1;
+            }
+            if (minuteCurrent >= minuteCreation)
+            {
+                minute = minuteCurrent - minuteCreation;
+            }
+            else
+            {
+                minute = (60 - minuteCreation) + minuteCurrent;
+                hourCurrent = hourCurrent - 1;
+            }
+            if (hourCurrent >= hourCreation)
+            {
+                hour = hourCurrent - hourCreation;
+            }
+            else
+            {
+                hour = (24 - hourCreation) + hourCurrent;
+                dayCurrent = dayCurrent - 1;
+            }
+            if (dayCurrent >= dayCreation)
+            {
+                day = day + (dayCurrent - dayCreation);
+            }
+            else
+            {
+                day = day + ((dayMonth - dayCreation) + dayCurrent);
+                monthCurrent = monthCurrent - 1;
+            }
+            if (monthCurrent >= monthCreation)
+            {
+                month = monthCurrent - monthCreation;
+            }
+            else
+            {
+                month = (12 - monthCreation) + monthCurrent;
+                yearCurrent = yearCurrent - 1;
+            }
+
+            year = yearCurrent - yearCreation;
+            if ("en".equals(lang))
+            {
+                if (year > 0)
+                {
+                    ret = (year + " years ago");
+                }
+                else if (month > 0)
+                {
+                    ret = (month + " month ago");
+                }
+                else if (day > 0)
+                {
+                    ret = (day + " days ago");
+                }
+                else if (hour > 0)
+                {
+                    ret = (hour + " hours ago");
+                }
+                else if (minute > 0)
+                {
+                    ret = (minute + " minutes ago");
+                }
+                else
+                {
+                    ret = (second + " second ago");
+                }
+            }
+            else
+            {
+                if (year > 0)
+                {
+                    ret = (year + " año(s) atrás");
+                }
+                else if (month > 0)
+                {
+                    ret = (month + " mes(es) atrás");
+                }
+                else if (day > 0)
+                {
+                    ret = (day + " día(s) atrás");
+                }
+                else if (hour > 0)
+                {
+                    ret = (hour + " hora(s) atrás");
+                }
+                else if (minute > 0)
+                {
+                    ret = (minute + " minuto(s) atrás");
+                }
+                else
+                {
+                    ret = (second + " segundo(s) atrás");
+                }
+            }
+            return ret;
         }        
+        
+        /**
+         * Replaces some special characters in a XML-formatted string by their
+         * entity names. The characters to replace are:
+         * {@literal \t, &, <, y >}.
+         * <p>
+         * Reemplaza algunos de los caracteres especiales presentes en una
+         * cadena con formato XML por su equivalente en nombre de entidad. Los
+         * caracteres a reemplazar son: {@literal \t, &, <, y >.}</p>
+         *
+         * @param str an XML-formatted string with some replaceable characters
+         * @return a string representing the same content that {@code str}, but
+         * with some characters replaced according to the following relations:
+         * {@literal \t} replaced by 4 blank spaces {@literal &} replaced by {@literal &amp;}
+         * {@literal <} replaced by {@literal &lt;}
+         * } replaced by {@literal &gt;} un objeto string que representa el
+         * mismo contenido que {@code str}, pero con algunos caracteres
+         * reemplazados de acuerdo a las relaciones anteriormente mostradas.
+         */
+        static public String replaceXMLChars(String str)
+        {
+            if (str == null)
+            {
+                return null;
+            }
+            StringBuffer ret = new StringBuffer(500);
+
+            // split tokens
+            StringTokenizer tokenizer = new StringTokenizer(str, " \t@%^&()-+=|\\{}[].;\"<>", true);
+            while (tokenizer.hasMoreTokens())
+            {
+                // next token
+                String token = tokenizer.nextToken();
+
+                // replace '\t' by the content of "tabulation"
+                if (token.startsWith("\t"))
+                {
+                    ret.append("    ");
+                    continue;
+                }
+
+                // replace '<' by '&lt;'
+                if (token.startsWith("<"))
+                {
+                    ret.append("&lt;");
+                    continue;
+                }
+
+                // replace '>' by '&gt;'
+                if (token.startsWith(">"))
+                {
+                    ret.append("&gt;");
+                    continue;
+                }
+
+                // replace '&' by '&amp;'
+                if (token.startsWith("&"))
+                {
+                    ret.append("&amp;");
+                    continue;
+                }
+                ret.append(token);
+            }
+            return ret.toString();
+
+        }
+
+        /**
+         * Replaces the entity name of some special characters by their
+         * representation in HTML code. The entity names to replace are:
+         * {@literal &lt;, &gt;, y &amp;}.
+         * <p>
+         * Reemplaza el nombre de entidad de algunos caracteres especiales, por
+         * su equivalente en HTML. Los nombres de entidad a reemplazar son:
+         *
+         * @param txt a string containing the text to replace
+         * @return a string with the entity names of some special characters
+         * replaced by their representation in HTML code. The entity names to
+         * look for are: {@literal &amp;} replaced by {@literal &}
+         * {@literal &lt;} replaced by {@literal <}
+         * }
+         * un objeto string con los nombres de entidad de algunos caracteres
+         * especiales reemplazados por su representaci&oacute;n en c&oacute;digo
+         * HTML, arriba se mencionan los reemplazos realizados.
+         * {@literal &lt;, &gt;, y &amp;}.</p>
+         */
+        static public String replaceXMLTags(String txt)
+        {
+
+            if (txt == null)
+            {
+                return null;
+            }
+            StringBuffer str = new StringBuffer(txt);
+            for (int x = 0; x < str.length(); x++)
+            {
+                char ch = str.charAt(x);
+                if (ch == '&')
+                {
+                    if (str.substring(x, x + 4).equals("&lt;"))
+                    {
+                        str.replace(x, x + 4, "<");
+                    }
+                    else if (str.substring(x, x + 4).equals("&gt;"))
+                    {
+                        str.replace(x, x + 4, ">");
+                    }
+                    else if (str.substring(x, x + 5).equals("&amp;"))
+                    {
+                        str.replace(x, x + 5, "&");
+                    }
+                }
+            }
+            return str.toString();
+        }   
+        
+        
+        /**
+         * Converts a date into a string with the format
+         * {@literal yyyy-MM-dd'T'HH:mm:ss'.'SSS}.
+         * <p>
+         * Convierte un objeto date a uno string con el formato
+         * {@literal yyyy-MM-dd'T'HH:mm:ss'.'SSS}.</p>
+         *
+         * @param date a date to convert
+         * @return a string representing the date received with the format
+         * {@literal yyyy-MM-dd'T'HH:mm:ss'.'SSS}. un objeto string que
+         * representa al date recibido, con el formato
+         * {@literal yyyy-MM-dd'T'HH:mm:ss'.'SSS}.
+         */
+        public static String iso8601DateFormat(Date date)
+        {
+            //SimpleDateFormat iso8601dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS");
+            return iso8601dateFormat.format(date)+"Z";
+        }        
+        
+        
     }
 
 }
