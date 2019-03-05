@@ -465,6 +465,7 @@ public class DataStoreMongo implements SWBDataStore
             DBCollection coll = db.getCollection(scls);
 
             BasicDBObject data = (BasicDBObject)json.get("data");
+            BasicDBObject oldValues = (BasicDBObject)json.get("oldValues");
 
             String id=data.getString("_id");
             BasicDBObject search=new BasicDBObject().append("_id", id);
@@ -473,7 +474,7 @@ public class DataStoreMongo implements SWBDataStore
             //System.out.println("base"+base);
 
             data.remove("_id");
-            DBObject obj=copyDBObject(base,data);
+            DBObject obj=copyDBObjectOldValues(base,data,oldValues);
             //data.markAsPartialObject();
             //DBObject obj=coll.findAndModify(search, data);
             coll.save(obj);
@@ -500,7 +501,23 @@ public class DataStoreMongo implements SWBDataStore
             base.put(key, jobj.get(key));
         }
         return base;
-    }     
+    } 
+
+    private DBObject copyDBObjectOldValues(DBObject base, DBObject jobj, DBObject oobj)
+    {
+        Iterator<String> it = jobj.keySet().iterator();
+        while (it.hasNext())
+        {
+            String key = it.next();
+            Object val=jobj.get(key);
+            //System.out.println("key:"+key);
+            //System.out.println("val:"+val);
+            //System.out.println("oobj:"+oobj);
+            if(oobj!=null && ((val!=null && val.equals(oobj.get(key))) || (val==null && oobj.get(key)==null)))continue;
+            base.put(key, jobj.get(key));
+        }
+        return base;
+    }    
     
     /**
      *

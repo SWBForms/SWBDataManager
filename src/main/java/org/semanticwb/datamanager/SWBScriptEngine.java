@@ -29,6 +29,12 @@ public interface SWBScriptEngine
      * @return
      */
     public String getAppName();
+    
+    /**
+     * Regresa configuracion de cache
+     * @return boolean
+     */
+    public boolean getDSCache();
 
     /**
      *
@@ -263,4 +269,17 @@ public interface SWBScriptEngine
      * @return 
      */    
     public DataObject getObjectById(String id);
+    
+    /**
+     * Disable DataProcessors, DataServices and DataTransformations
+     * @param disabledDataTransforms boolean
+     */
+    public void setDisabledDataTransforms(boolean disabledDataTransforms);
+
+    /**
+     * return true if is disable DataProcessors, DataServices and DataTransformations
+     * @return boolean
+     */
+    public boolean isDisabledDataTransforms();
+
 }

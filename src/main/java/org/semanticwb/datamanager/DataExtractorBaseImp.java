@@ -173,7 +173,10 @@ public class DataExtractorBaseImp implements DataExtractorBase
                 public void run() {
                     try
                     {
-                        extractor.extract(base);
+                        if(!scriptEngine.isDisabledDataTransforms())
+                        {
+                            extractor.extract(base);
+                        }
                     }catch(Exception e)
                     {
                         e.printStackTrace();

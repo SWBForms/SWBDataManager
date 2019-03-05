@@ -62,6 +62,8 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
     private boolean closed=false;
     private boolean internalSource=false;
     
+    private boolean disabledDataTransforms=false;
+    
     private SWBScriptUtils utils;
 
     private SWBBaseScriptEngine(String source)
@@ -491,6 +493,8 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
      */
     protected void invokeDataServices(SWBScriptEngine userengine, String dataSource, String action, DataObject request, DataObject response)
     {
+        if(disabledDataTransforms)return;
+        
         List<SWBDataService> list=findDataServices(dataSource, action);
         if(list!=null)
         {
@@ -557,6 +561,8 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
      */
     protected DataObject invokeDataProcessors(SWBScriptEngine userengine, String dataSource, String action, String method, DataObject obj)
     {
+        if(disabledDataTransforms)return obj;
+        
         List<SWBDataProcessor> list=findDataProcessors(dataSource, action);
         if(list!=null)
         {
@@ -723,27 +729,25 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
      */
     @Override
     public void chechUpdates()
-    {
-/*        
-        //Se movio a admin_db.js.jsp
-        if(needsReload)
-        {
-            synchronized(this)
-            {
-                if(needsReload)
-                {
-                    needsReload=false;
-                    logger.log(Level.INFO,"remove ScriptEngine:"+source);
-                    reloadScriptEngine();
-                }
-            }
-        }else
-*/        
+    {        
         {
             long time=System.currentTimeMillis();
             if((time-lastCheck)>10000)
             {
                 lastCheck=time;
+                if(needsReload)
+                {
+                    synchronized(this)
+                    {
+                        if(needsReload)
+                        {
+                            needsReload=false;
+                            logger.log(Level.INFO,"remove ScriptEngine:"+source);
+                            reloadScriptEngine();
+                        }
+                    }
+                }                
+                
                 Iterator<SWBScriptFile> it=files.iterator();
                 while (it.hasNext()) {
                     SWBScriptFile f = it.next();
@@ -990,6 +994,19 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         }
         return null;
     }
+    
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean getDSCache() {
+        ScriptObject config = getScriptObject().get("config");
+        if (config != null) {
+            return Boolean.parseBoolean(config.getString("dsCache"));
+        }
+        return false;
+    }    
 
     /**
      *
@@ -1015,6 +1032,14 @@ public class SWBBaseScriptEngine implements SWBScriptEngine
         String ids[]=id.split(":");
         if(ids.length==4)return getDataSource(ids[2], ids[1]).getObjectById(id);
         return null;        
+    }
+
+    public void setDisabledDataTransforms(boolean disabledDataTransforms) {
+        this.disabledDataTransforms = disabledDataTransforms;
+    }
+
+    public boolean isDisabledDataTransforms() {
+        return disabledDataTransforms;
     }
     
     /**

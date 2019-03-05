@@ -443,6 +443,15 @@ public class SWBUserScriptEngine implements SWBScriptEngine
     public String getAppName() {
         return engine.getAppName();
     }
+    
+    /**
+     *
+     * @return
+     */
+    @Override
+    public boolean getDSCache() {
+        return engine.getDSCache();
+    }    
 
     /**
      *
@@ -494,6 +503,15 @@ public class SWBUserScriptEngine implements SWBScriptEngine
         if(ids.length==4)return getDataSource(ids[2], ids[1]).getObjectById(id);
         return null;        
     }
-    
+
+    @Override
+    public void setDisabledDataTransforms(boolean disabledDataTransforms) {
+        engine.setDisabledDataTransforms(disabledDataTransforms);
+    }
+
+    @Override
+    public boolean isDisabledDataTransforms() {
+        return engine.isDisabledDataTransforms();
+    }    
     
 }
